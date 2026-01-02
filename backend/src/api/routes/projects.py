@@ -1,16 +1,19 @@
-import json
+"""Project management API routes."""
+
 import time
 import uuid
+from typing import ClassVar
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+from src.claude_service import claude_service
+
 router = APIRouter(prefix="/projects", tags=["projects"])
 
-projects: dict[str, dict] = {}
 
-TOOL_CONFIG = {
+TOOL_CONFIG: dict[str, dict[str, str]] = {
     "sanctions": {"name": "Sanctions Check", "icon": "shield"},
     "adverse_media": {"name": "Adverse Media", "icon": "newspaper"},
     "business_registry": {"name": "Business Registry", "icon": "building"},
@@ -18,18 +21,46 @@ TOOL_CONFIG = {
     "geo_risk": {"name": "Geographic Risk", "icon": "globe"},
 }
 
+DEFAULT_TOOLS = ["sanctions", "pep_check", "adverse_media", "geo_risk"]
 
-class StartRequest(BaseModel):
-    entity_name: str
-    entity_type: str = "company"
-    country: str = ""
-    tools: list[str] = ["sanctions", "pep_check", "adverse_media", "geo_risk"]
+
+class ProjectStore:
+    """In-memory project storage (replace with database in production)."""
+
+    _projects: ClassVar[dict[str, dict]] = {}
+
+    @classmethod
+    def create(cls, project_id: str, data: dict) -> dict:
+        cls._projects[project_id] = data
+        return data
+
+    @classmethod
+    def get(cls, project_id: str) -> dict | None:
+        return cls._projects.get(project_id)
+
+    @classmethod
+    def update(cls, project_id: str, updates: dict) -> dict | None:
+        if project_id in cls._projects:
+            cls._projects[project_id].update(updates)
+            return cls._projects[project_id]
+        return None
+
+    @classmethod
+    def exists(cls, project_id: str) -> bool:
+        return project_id in cls._projects
 
 
 class ToolInfo(BaseModel):
     id: str
     key: str
     name: str
+
+
+class StartRequest(BaseModel):
+    entity_name: str
+    entity_type: str = "company"
+    country: str = ""
+    tools: list[str] = DEFAULT_TOOLS
 
 
 class StartResponse(BaseModel):
@@ -39,21 +70,29 @@ class StartResponse(BaseModel):
     tools: list[ToolInfo]
 
 
+def generate_project_id() -> str:
+    return f"proj-{uuid.uuid4().hex[:8]}"
+
+
+def generate_tool_id(tool_key: str) -> str:
+    return f"{tool_key}-{uuid.uuid4().hex[:6]}"
+
+
+def build_tool_infos(tool_keys: list[str]) -> list[dict]:
+    return [
+        {"id": generate_tool_id(key), "key": key, "name": TOOL_CONFIG[key]["name"]}
+        for key in tool_keys
+        if key in TOOL_CONFIG
+    ]
+
+
 @router.post("/start", response_model=StartResponse)
-async def start_project(req: StartRequest):
-    project_id = f"proj-{uuid.uuid4().hex[:8]}"
+async def start_project(req: StartRequest) -> StartResponse:
+    """Start a new compliance investigation project."""
+    project_id = generate_project_id()
+    tool_infos = build_tool_infos(req.tools)
 
-    tool_infos = []
-    for tool_key in req.tools:
-        if tool_key in TOOL_CONFIG:
-            tool_id = f"{tool_key}-{uuid.uuid4().hex[:6]}"
-            tool_infos.append({
-                "id": tool_id,
-                "key": tool_key,
-                "name": TOOL_CONFIG[tool_key]["name"],
-            })
-
-    projects[project_id] = {
+    ProjectStore.create(project_id, {
         "id": project_id,
         "entity_name": req.entity_name,
         "entity_type": req.entity_type,
@@ -61,7 +100,7 @@ async def start_project(req: StartRequest):
         "tools": tool_infos,
         "status": "pending",
         "started_at": time.time(),
-    }
+    })
 
     return StartResponse(
         project_id=project_id,
@@ -72,35 +111,36 @@ async def start_project(req: StartRequest):
 
 
 @router.get("/{project_id}/stream")
-async def stream(project_id: str):
-    if project_id not in projects:
-        raise HTTPException(404, "Not found")
+async def stream_project(project_id: str) -> StreamingResponse:
+    """Stream SSE events for a running project."""
+    project = ProjectStore.get(project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
 
-    proj = projects[project_id]
-    proj["status"] = "running"
+    ProjectStore.update(project_id, {"status": "running"})
 
-    from src.claude_service import claude_service
-
-    async def gen():
+    async def event_generator():
         async for chunk in claude_service.run_project(
             project_id=project_id,
-            entity_name=proj["entity_name"],
-            entity_type=proj["entity_type"],
-            tools=proj["tools"],
-            country=proj.get("country", ""),
+            entity_name=project["entity_name"],
+            entity_type=project["entity_type"],
+            tools=project["tools"],
+            country=project.get("country", ""),
         ):
             yield chunk
-        proj["status"] = "completed"
+        ProjectStore.update(project_id, {"status": "completed"})
 
-    headers = {
-        "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
-    }
-    return StreamingResponse(gen(), media_type="text/event-stream", headers=headers)
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "Connection": "keep-alive"},
+    )
 
 
 @router.get("/{project_id}")
-async def get(project_id: str):
-    if project_id not in projects:
-        raise HTTPException(404, "Not found")
-    return projects[project_id]
+async def get_project(project_id: str) -> dict:
+    """Get project details."""
+    project = ProjectStore.get(project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return project

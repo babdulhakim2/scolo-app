@@ -1,14 +1,13 @@
-"""Claude Code SDK service using Skills for compliance tools."""
+"""Claude Agent SDK service for compliance screening."""
 
 import json
 import logging
 import os
 import re
-import time
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, AsyncGenerator, Optional
+from typing import Any, AsyncGenerator
 
 from claude_agent_sdk import query, ClaudeAgentOptions
 
@@ -25,8 +24,11 @@ TOOL_PATTERNS = {
     "business_registry": re.compile(r"(?:business_registry\.py|src\.tools\.business_registry|tools/business_registry)"),
 }
 
+WARNING_STATUSES = frozenset({"match", "alert", "high", "critical"})
 
-def _to_dict(obj: Any) -> Any:
+
+def to_dict(obj: Any) -> Any:
+    """Recursively convert objects to dictionaries."""
     if is_dataclass(obj):
         return asdict(obj)
     if hasattr(obj, "model_dump"):
@@ -34,21 +36,22 @@ def _to_dict(obj: Any) -> Any:
     if hasattr(obj, "dict"):
         return obj.dict()
     if isinstance(obj, dict):
-        return {k: _to_dict(v) for k, v in obj.items()}
+        return {k: to_dict(v) for k, v in obj.items()}
     if isinstance(obj, (list, tuple, set)):
-        return [_to_dict(item) for item in obj]
+        return [to_dict(item) for item in obj]
     if isinstance(obj, (str, int, float, bool)) or obj is None:
         return obj
     if hasattr(obj, "__dict__"):
         return {
-            key: _to_dict(value)
+            key: to_dict(value)
             for key, value in vars(obj).items()
             if not callable(value) and not key.startswith("_")
         }
     return repr(obj)
 
 
-def _detect_tool_from_command(command: str) -> Optional[str]:
+def detect_tool_from_command(command: str) -> str | None:
+    """Detect which compliance tool a command invokes."""
     if not command.strip().startswith("python"):
         return None
     for tool_key, pattern in TOOL_PATTERNS.items():
@@ -57,17 +60,24 @@ def _detect_tool_from_command(command: str) -> Optional[str]:
     return None
 
 
-def _parse_tool_result(content: str) -> Optional[dict]:
+def parse_tool_result(content: str) -> dict | None:
+    """Extract JSON result from tool output."""
     try:
         json_match = re.search(r'\{[\s\S]*\}', content)
         if json_match:
             return json.loads(json_match.group())
-    except:
+    except (json.JSONDecodeError, AttributeError):
         pass
     return None
 
 
-def _emit(event_type: str, project_id: str, agent_id: str = None, payload: dict = None) -> str:
+def format_sse_event(
+    event_type: str,
+    project_id: str,
+    agent_id: str | None = None,
+    payload: dict | None = None
+) -> str:
+    """Format a Server-Sent Event message."""
     event = {"type": event_type, "project_id": project_id}
     if agent_id:
         event["agent_id"] = agent_id
@@ -76,15 +86,28 @@ def _emit(event_type: str, project_id: str, agent_id: str = None, payload: dict 
     return f"data: {json.dumps(event)}\n\n"
 
 
+def build_tool_commands(entity_name: str, country: str) -> dict[str, str]:
+    """Build shell commands for each compliance tool."""
+    return {
+        "sanctions": f'python -m src.tools.sanctions "{entity_name}"',
+        "pep_check": f'python -m src.tools.pep_check "{entity_name}"',
+        "adverse_media": f'python -m src.tools.adverse_media "{entity_name}"',
+        "geo_risk": f'python -m src.tools.geo_risk "{country or "US"}"',
+        "business_registry": f'python -m src.tools.business_registry "{entity_name}"',
+    }
+
+
 class ClaudeService:
-    def __init__(self, api_key: Optional[str] = None):
+    """Service for running compliance investigations via Claude Agent SDK."""
+
+    def __init__(self, api_key: str | None = None):
         self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
         self._log_files: dict[str, Path] = {}
         if self.api_key:
             os.environ["ANTHROPIC_API_KEY"] = self.api_key
             logger.info("ClaudeService initialized")
         else:
-            logger.warning("ANTHROPIC_API_KEY not set - will check at runtime")
+            logger.warning("ANTHROPIC_API_KEY not set")
 
     def _get_log_file(self, project_id: str) -> Path:
         if project_id not in self._log_files:
@@ -105,145 +128,199 @@ class ClaudeService:
         tools: list[dict],
         country: str = "",
     ) -> AsyncGenerator[str, None]:
-        if not self.api_key:
-            self.api_key = os.getenv("ANTHROPIC_API_KEY")
-            if self.api_key:
-                os.environ["ANTHROPIC_API_KEY"] = self.api_key
-            else:
-                yield _emit("error", project_id, payload={"message": "ANTHROPIC_API_KEY not configured"})
-                return
+        """Run a compliance investigation project with SSE streaming."""
+        if not self._ensure_api_key():
+            yield format_sse_event("error", project_id, payload={"message": "ANTHROPIC_API_KEY not configured"})
+            return
 
-        cwd = Path(__file__).parent.parent
-        tool_map = {t["key"]: t for t in tools}
-
-        tool_commands = {
-            "sanctions": f'python -m src.tools.sanctions "{entity_name}"',
-            "pep_check": f'python -m src.tools.pep_check "{entity_name}"',
-            "adverse_media": f'python -m src.tools.adverse_media "{entity_name}"',
-            "geo_risk": f'python -m src.tools.geo_risk "{country or "US"}"',
-            "business_registry": f'python -m src.tools.business_registry "{entity_name}"',
-        }
-
-        tool_instructions = []
-        for t in tools:
-            cmd = tool_commands.get(t["key"], "")
-            if cmd:
-                tool_instructions.append(f"- {t['name']} ({t['id']}): `{cmd}`")
-
-        prompt = f"""Investigate "{entity_name}" ({entity_type}) for compliance risk.
-
-Run these exact commands (do NOT modify them):
-{chr(10).join(tool_instructions)}
-
-Run all commands in parallel. Do NOT use TodoWrite or explore the codebase.
-After all complete, provide a brief risk summary."""
-
-        self._log(project_id, {"type": "prompt", "content": prompt})
-
-        yield _emit("project_start", project_id, payload={
+        yield format_sse_event("project_start", project_id, payload={
             "entity_name": entity_name,
             "entity_type": entity_type,
         })
 
-        pending_tool_calls: dict[str, str] = {}
+        prompt = self._build_prompt(entity_name, entity_type, tools, country)
+        self._log(project_id, {"type": "prompt", "content": prompt})
+
+        tool_map = {t["key"]: t for t in tools}
+        pending_calls: dict[str, str] = {}
         started_tools: set[str] = set()
-        results_summary = []
+        results: list[dict] = []
 
         try:
-            options = ClaudeAgentOptions(
-                max_turns=20,
-                cwd=cwd,
-                allowed_tools=["Skills","Bash", "Read"],
-                # disallowed_tools=["TodoWrite"],
-                # permission_mode="acceptEdits",
-                setting_sources=["user", "project"],
-                model="claude-sonnet-4-5",
-            )
+            async for event in self._stream_agent(prompt, project_id, tool_map, pending_calls, started_tools, results):
+                yield event
 
-            async for message in query(prompt=prompt, options=options):
-                msg_dict = _to_dict(message)
-                self._log(project_id, {"type": "message", "content": msg_dict})
-                print(msg_dict)
-
-                content = msg_dict.get("content", [])
-                if not isinstance(content, list):
-                    continue
-
-                yield _emit("trace", project_id, payload={"message": msg_dict})
-
-                for item in content:
-                    if not isinstance(item, dict):
-                        continue
-
-                    if item.get("name") == "Bash" and "input" in item:
-                        command = item["input"].get("command", "")
-                        tool_use_id = item.get("id", "")
-                        detected_tool = _detect_tool_from_command(command)
-                        print(f"[DEBUG] Bash cmd: {command[:50]}... detected={detected_tool}")
-
-                        if detected_tool and detected_tool in tool_map:
-                            tool_info = tool_map[detected_tool]
-                            pending_tool_calls[tool_use_id] = detected_tool
-                            if detected_tool not in started_tools:
-                                started_tools.add(detected_tool)
-                                task_msg = f"Running {tool_info['name']}..."
-                                print(f"[DEBUG] Emitting agent_start for {tool_info['id']}")
-                                yield _emit("agent_start", project_id, tool_info["id"], {"task": task_msg})
-
-                    if "tool_use_id" in item:
-                        print(f"[DEBUG] Tool result: {item.get('tool_use_id')} in pending: {item.get('tool_use_id') in pending_tool_calls}")
-
-                    if "tool_use_id" in item and item.get("tool_use_id") in pending_tool_calls:
-                        tool_use_id = item["tool_use_id"]
-                        tool_key = pending_tool_calls.pop(tool_use_id)
-                        tool_info = tool_map.get(tool_key)
-
-                        if tool_info:
-                            result_content = item.get("content", "")
-                            parsed = _parse_tool_result(result_content)
-                            print(f"[DEBUG] Parsed result for {tool_key}: {parsed is not None}")
-
-                            is_error = item.get("is_error", False)
-                            if is_error:
-                                print(f"[DEBUG] Emitting agent_error for {tool_info['id']}")
-                                yield _emit("agent_error", project_id, tool_info["id"], {
-                                    "error": result_content[:500],
-                                })
-                            elif parsed:
-                                status = parsed.get("status", "unknown")
-                                findings = parsed.get("findings", [])
-                                is_warning = status in ["match", "alert", "high", "critical"]
-                                print(f"[DEBUG] Emitting agent_complete for {tool_info['id']}")
-
-                                yield _emit("agent_complete", project_id, tool_info["id"], {
-                                    "status": status,
-                                    "resultType": "warning" if is_warning else "success",
-                                    "findings": findings,
-                                    "confidence": parsed.get("confidence", 80),
-                                })
-
-                                results_summary.append({
-                                    "tool": tool_info["name"],
-                                    "status": status,
-                                    "findings": len(findings),
-                                })
-
-            total_findings = sum(r["findings"] for r in results_summary)
-            has_match = any(r["status"] in ["match", "alert", "high", "critical"] for r in results_summary)
-            risk_level = "high" if has_match else "medium" if total_findings > 0 else "low"
-
-            yield _emit("project_complete", project_id, payload={
-                "total_findings": total_findings,
-                "tools_completed": len(results_summary),
-                "risk_level": risk_level,
-                "results": results_summary,
-            })
-            self._log(project_id, {"type": "complete", "results": results_summary})
+            yield self._build_completion_event(project_id, results)
 
         except Exception as e:
-            logger.error(f"Stream error: {e}")
+            logger.exception("Stream error")
             self._log(project_id, {"type": "error", "error": str(e)})
-            yield _emit("error", project_id, payload={"message": str(e)})
+            yield format_sse_event("error", project_id, payload={"message": str(e)})
+
+    def _ensure_api_key(self) -> bool:
+        if not self.api_key:
+            self.api_key = os.getenv("ANTHROPIC_API_KEY")
+            if self.api_key:
+                os.environ["ANTHROPIC_API_KEY"] = self.api_key
+        return bool(self.api_key)
+
+    def _build_prompt(self, entity_name: str, entity_type: str, tools: list[dict], country: str) -> str:
+        tool_commands = build_tool_commands(entity_name, country)
+        instructions = [
+            f"- {t['name']} ({t['id']}): `{tool_commands.get(t['key'], '')}`"
+            for t in tools if t['key'] in tool_commands
+        ]
+        return f"""Investigate "{entity_name}" ({entity_type}) for compliance risk.
+
+Run these exact commands (do NOT modify them):
+{chr(10).join(instructions)}
+
+Run all commands in parallel. Do NOT use TodoWrite or explore the codebase.
+After all complete, provide a brief risk summary."""
+
+    async def _stream_agent(
+        self,
+        prompt: str,
+        project_id: str,
+        tool_map: dict,
+        pending_calls: dict,
+        started_tools: set,
+        results: list
+    ) -> AsyncGenerator[str, None]:
+        cwd = Path(__file__).parent.parent
+        options = ClaudeAgentOptions(
+            max_turns=20,
+            cwd=cwd,
+            allowed_tools=["Skills", "Bash", "Read"],
+            setting_sources=["user", "project"],
+            model="claude-sonnet-4-5",
+        )
+
+        async for message in query(prompt=prompt, options=options):
+            msg_dict = to_dict(message)
+            self._log(project_id, {"type": "message", "content": msg_dict})
+            logger.debug("Message: %s", msg_dict)
+
+            content = msg_dict.get("content", [])
+            if not isinstance(content, list):
+                continue
+
+            yield format_sse_event("trace", project_id, payload={"message": msg_dict})
+
+            for item in content:
+                if not isinstance(item, dict):
+                    continue
+
+                event = self._process_content_item(
+                    item, project_id, tool_map, pending_calls, started_tools, results
+                )
+                if event:
+                    yield event
+
+    def _process_content_item(
+        self,
+        item: dict,
+        project_id: str,
+        tool_map: dict,
+        pending_calls: dict,
+        started_tools: set,
+        results: list
+    ) -> str | None:
+        if item.get("name") == "Bash" and "input" in item:
+            return self._handle_bash_call(item, project_id, tool_map, pending_calls, started_tools)
+
+        if "tool_use_id" in item and item.get("tool_use_id") in pending_calls:
+            return self._handle_tool_result(item, project_id, tool_map, pending_calls, results)
+
+        return None
+
+    def _handle_bash_call(
+        self,
+        item: dict,
+        project_id: str,
+        tool_map: dict,
+        pending_calls: dict,
+        started_tools: set
+    ) -> str | None:
+        command = item["input"].get("command", "")
+        tool_use_id = item.get("id", "")
+        detected_tool = detect_tool_from_command(command)
+
+        if not detected_tool or detected_tool not in tool_map:
+            return None
+
+        tool_info = tool_map[detected_tool]
+        pending_calls[tool_use_id] = detected_tool
+
+        if detected_tool not in started_tools:
+            started_tools.add(detected_tool)
+            return format_sse_event(
+                "agent_start", project_id, tool_info["id"],
+                {"task": f"Running {tool_info['name']}..."}
+            )
+        return None
+
+    def _handle_tool_result(
+        self,
+        item: dict,
+        project_id: str,
+        tool_map: dict,
+        pending_calls: dict,
+        results: list
+    ) -> str | None:
+        tool_use_id = item["tool_use_id"]
+        tool_key = pending_calls.pop(tool_use_id)
+        tool_info = tool_map.get(tool_key)
+
+        if not tool_info:
+            return None
+
+        result_content = item.get("content", "")
+        is_error = item.get("is_error", False)
+
+        if is_error:
+            return format_sse_event(
+                "agent_error", project_id, tool_info["id"],
+                {"error": result_content[:500]}
+            )
+
+        parsed = parse_tool_result(result_content)
+        if not parsed:
+            return None
+
+        status = parsed.get("status", "unknown")
+        findings = parsed.get("findings", [])
+        is_warning = status in WARNING_STATUSES
+
+        results.append({
+            "tool": tool_info["name"],
+            "status": status,
+            "findings": len(findings),
+        })
+
+        return format_sse_event(
+            "agent_complete", project_id, tool_info["id"],
+            {
+                "status": status,
+                "resultType": "warning" if is_warning else "success",
+                "findings": findings,
+                "confidence": parsed.get("confidence", 80),
+            }
+        )
+
+    def _build_completion_event(self, project_id: str, results: list) -> str:
+        total_findings = sum(r["findings"] for r in results)
+        has_match = any(r["status"] in WARNING_STATUSES for r in results)
+        risk_level = "high" if has_match else "medium" if total_findings > 0 else "low"
+
+        self._log(project_id, {"type": "complete", "results": results})
+
+        return format_sse_event("project_complete", project_id, payload={
+            "total_findings": total_findings,
+            "tools_completed": len(results),
+            "risk_level": risk_level,
+            "results": results,
+        })
 
 
 claude_service = ClaudeService()

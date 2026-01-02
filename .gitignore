@@ -46,3 +46,4 @@ venv
 __pycache__
 logs
 .scolo_backend.egg-info
+.vscode

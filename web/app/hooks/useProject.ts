@@ -2,6 +2,7 @@
 
 import { useCallback, useRef } from 'react';
 import { useCanvasStore } from '@/app/store/canvas-store';
+import { createProjectInDb } from '@/lib/services/canvas-sync';
 import type { SSEMessage, ToolKey, StartProjectResponse } from '@/app/types/canvas';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
@@ -15,6 +16,8 @@ export function useProject() {
     setProcessing,
     setSSEConnected,
     setSSEError,
+    addProject,
+    setActiveProjectId,
   } = useCanvasStore();
 
   const startProject = useCallback(
@@ -52,6 +55,30 @@ export function useProject() {
         }
 
         const data: StartProjectResponse = await res.json();
+
+        const dbCreated = await createProjectInDb({
+          id: data.project_id,
+          name: `Investigation: ${entityName}`,
+          entityName,
+          entityType: isCompany ? 'company' : 'individual',
+          country,
+          status: 'running',
+        });
+
+        if (!dbCreated) {
+          throw new Error('Failed to create project in database');
+        }
+
+        addProject({
+          id: data.project_id,
+          name: `Investigation: ${entityName}`,
+          entityCount: 0,
+          status: 'running',
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+
+        setActiveProjectId(data.project_id);
 
         if (eventSourceRef.current) {
           eventSourceRef.current.close();
@@ -99,7 +126,7 @@ export function useProject() {
         return null;
       }
     },
-    [handleSSEMessage, setProcessing, setSSEConnected, setSSEError]
+    [handleSSEMessage, setProcessing, setSSEConnected, setSSEError, addProject, setActiveProjectId]
   );
 
   const disconnect = useCallback(() => {

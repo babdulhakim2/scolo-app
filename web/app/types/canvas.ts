@@ -65,12 +65,14 @@ export type SSEMessage =
   | { type: 'agent_error'; project_id: string; agent_id: string; payload: AgentPayload }
   | { type: 'trace'; project_id: string; payload: TracePayload };
 
+export type ProjectStatus = 'pending' | 'running' | 'completed' | 'failed' | 'archived';
+
 export interface Project {
   id: string;
   name: string;
   description?: string;
   entityCount: number;
-  status: 'active' | 'archived';
+  status: ProjectStatus;
   createdAt: number;
   updatedAt: number;
 }

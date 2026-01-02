@@ -1,10 +1,30 @@
 'use client';
 
-import { Shield, FolderOpen, Plus, Settings, Bell, PanelLeftClose, PanelLeft, Pencil } from 'lucide-react';
+import { useEffect } from 'react';
+import { Shield, FolderOpen, Plus, Settings, Bell, PanelLeftClose, PanelLeft, Pencil, Loader2 } from 'lucide-react';
 import { useCanvasStore } from '@/app/store/canvas-store';
 
 export function LeftPanel() {
-  const { currentProject, projects, sidebarCollapsed, setCurrentProject, toggleSidebar } = useCanvasStore();
+  const {
+    projects,
+    activeProjectId,
+    sidebarCollapsed,
+    isProcessing,
+    toggleSidebar,
+    fetchProjects,
+    loadProject,
+    setActiveProjectId,
+  } = useCanvasStore();
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  const handleProjectClick = async (projectId: string) => {
+    if (projectId === activeProjectId) return;
+    setActiveProjectId(projectId);
+    await loadProject(projectId);
+  };
 
   return (
     <div
@@ -66,63 +86,84 @@ export function LeftPanel() {
             <div className="text-xs text-slate-500 uppercase tracking-wider mb-4 px-2 font-medium">Projects</div>
           )}
           <div className="space-y-1">
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                className={`w-full rounded-xl transition-all group relative ${
-                  project.name === currentProject
-                    ? 'bg-cyan-50 border border-cyan-200 shadow-sm'
-                    : 'hover:bg-slate-50'
-                }`}
-              >
-                <div className="w-full p-3 flex items-center gap-3">
-                  <button
-                    onClick={() => setCurrentProject(project.name)}
-                    className="flex-1 flex items-center gap-2 text-left"
-                    title={sidebarCollapsed ? project.name : undefined}
-                  >
-                    {sidebarCollapsed ? (
-                      <div className="flex items-center justify-center w-full">
-                        <FolderOpen
-                          className={`w-4 h-4 ${project.name === currentProject ? 'text-cyan-600' : 'text-slate-400'}`}
-                        />
-                      </div>
-                    ) : (
-                      <>
-                        <div
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                            project.name === currentProject ? 'bg-cyan-500 shadow-lg shadow-cyan-500/20' : 'bg-slate-100'
-                          }`}
-                        >
-                          <FolderOpen
-                            className={`w-3.5 h-3.5 ${project.name === currentProject ? 'text-white' : 'text-slate-500'}`}
-                          />
-                        </div>
-                        <div className="flex-1 overflow-hidden">
-                          <div
-                            className={`text-sm font-medium leading-snug ${
-                              project.name === currentProject ? 'text-slate-900' : 'text-slate-600'
-                            }`}
-                          >
-                            {project.name}
-                          </div>
-                          <div className="text-xs text-slate-400">{project.entityCount} entities</div>
-                        </div>
-                      </>
-                    )}
-                  </button>
-                  {!sidebarCollapsed && project.name === currentProject && (
-                    <button
-                      className="opacity-0 group-hover:opacity-100 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-cyan-100 transition-all"
-                      onClick={(e) => e.stopPropagation()}
-                      title="Edit project"
-                    >
-                      <Pencil className="w-3 h-3 text-cyan-600" />
-                    </button>
-                  )}
-                </div>
+            {projects.length === 0 ? (
+              <div className="text-center py-8 text-slate-400 text-sm">
+                {sidebarCollapsed ? '' : 'No projects yet'}
               </div>
-            ))}
+            ) : (
+              projects.map((project) => {
+                const isActive = project.id === activeProjectId;
+                const isRunning = project.status === 'running';
+                return (
+                  <div
+                    key={project.id}
+                    className={`w-full rounded-xl transition-all group relative ${
+                      isActive
+                        ? 'bg-cyan-50 border border-cyan-200 shadow-sm'
+                        : 'hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="w-full p-3 flex items-center gap-3">
+                      <button
+                        onClick={() => handleProjectClick(project.id)}
+                        disabled={isProcessing}
+                        className="flex-1 flex items-center gap-2 text-left disabled:opacity-50"
+                        title={sidebarCollapsed ? project.name : undefined}
+                      >
+                        {sidebarCollapsed ? (
+                          <div className="flex items-center justify-center w-full">
+                            {isRunning ? (
+                              <Loader2 className="w-4 h-4 text-cyan-500 animate-spin" />
+                            ) : (
+                              <FolderOpen
+                                className={`w-4 h-4 ${isActive ? 'text-cyan-600' : 'text-slate-400'}`}
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            <div
+                              className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                isActive ? 'bg-cyan-500 shadow-lg shadow-cyan-500/20' : 'bg-slate-100'
+                              }`}
+                            >
+                              {isRunning ? (
+                                <Loader2 className={`w-3.5 h-3.5 animate-spin ${isActive ? 'text-white' : 'text-cyan-500'}`} />
+                              ) : (
+                                <FolderOpen
+                                  className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-500'}`}
+                                />
+                              )}
+                            </div>
+                            <div className="flex-1 overflow-hidden">
+                              <div
+                                className={`text-sm font-medium leading-snug truncate ${
+                                  isActive ? 'text-slate-900' : 'text-slate-600'
+                                }`}
+                              >
+                                {project.name}
+                              </div>
+                              <div className="text-xs text-slate-400">
+                                {isRunning ? 'Running...' : project.status}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </button>
+                      {!sidebarCollapsed && isActive && (
+                        <button
+                          className="opacity-0 group-hover:opacity-100 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-cyan-100 transition-all"
+                          onClick={(e) => e.stopPropagation()}
+                          title="Edit project"
+                        >
+                          <Pencil className="w-3 h-3 text-cyan-600" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
