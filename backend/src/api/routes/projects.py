@@ -4,6 +4,8 @@ import time
 import uuid
 from typing import ClassVar
 
+from cuid2 import cuid_wrapper
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -70,8 +72,11 @@ class StartResponse(BaseModel):
     tools: list[ToolInfo]
 
 
+cuid = cuid_wrapper()
+
+
 def generate_project_id() -> str:
-    return f"proj-{uuid.uuid4().hex[:8]}"
+    return cuid()
 
 
 def generate_tool_id(tool_key: str) -> str:

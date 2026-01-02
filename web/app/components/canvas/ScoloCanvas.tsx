@@ -27,24 +27,45 @@ const nodeTypes = {
   summary: SummaryNode,
 };
 
-function Canvas() {
+interface CanvasProps {
+  projectId?: string;
+}
+
+function Canvas({ projectId }: CanvasProps) {
   const {
     nodes,
     edges,
     selectedNodes,
     detailPanelOpen,
     shouldFitView,
+    activeProjectId,
     onNodesChange,
     onEdgesChange,
     onConnect,
     selectNode,
     clearSelection,
     setShouldFitView,
+    loadProject,
+    setActiveProjectId,
+    fetchProjects,
   } = useCanvasStore();
 
   const { fitView } = useReactFlow();
   const fitViewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastFitViewRef = useRef<number>(0);
+  const hasLoadedRef = useRef(false);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  useEffect(() => {
+    if (projectId && projectId !== activeProjectId && !hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      setActiveProjectId(projectId);
+      loadProject(projectId);
+    }
+  }, [projectId, activeProjectId, setActiveProjectId, loadProject]);
 
   useEffect(() => {
     if (shouldFitView && nodes.length > 0) {
@@ -128,10 +149,14 @@ function Canvas() {
   );
 }
 
-export default function ScoloCanvas() {
+interface ScoloCanvasProps {
+  projectId?: string;
+}
+
+export default function ScoloCanvas({ projectId }: ScoloCanvasProps) {
   return (
     <ReactFlowProvider>
-      <Canvas />
+      <Canvas projectId={projectId} />
     </ReactFlowProvider>
   );
 }

@@ -1,5 +1,5 @@
-import ScoloCanvas from '@/app/components/canvas/ScoloCanvas';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return <ScoloCanvas />;
+  redirect('/projects');
 }

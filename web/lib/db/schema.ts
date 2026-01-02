@@ -2,6 +2,7 @@ import { pgTable, text, timestamp, jsonb, integer, boolean, real } from 'drizzle
 
 export const projects = pgTable('projects', {
   id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
   name: text('name').notNull(),
   entityName: text('entity_name').notNull(),
   entityType: text('entity_type').notNull().default('company'),
