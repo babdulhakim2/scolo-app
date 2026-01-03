@@ -4,10 +4,9 @@
 import json
 import os
 import sys
-import uuid
 from typing import Any
 
-from . import weave_op
+from . import weave_op, cuid
 
 TOOL_ID = "geo_risk"
 
@@ -50,7 +49,7 @@ COUNTRY_ALIASES = {
 @weave_op
 def check(country: str, **opts) -> dict[str, Any]:
     """Assess geographic risk for a country."""
-    result_id = f"{TOOL_ID}-{uuid.uuid4().hex[:8]}"
+    result_id = cuid()
 
     code = country.lower().strip()
     if code in COUNTRY_ALIASES:

@@ -59,19 +59,25 @@ export interface SelectedNode {
 const LAYOUT = {
   CENTER_X: 500,
   ENTITY_Y: 80,
-  AGENT_Y: 260,
-  AGENT_SPACING: 280,
-  SUMMARY_Y: 480,
-  ORGANIZE_SPACING: 300,
-  ORGANIZE_LEVEL_SPACING: 200,
-  ORGANIZE_START_X: 200,
-  ORGANIZE_START_Y: 100,
+  AGENT_Y: 280,
+  AGENT_SPACING: 320,
+  FINDING_Y: 500,
+  FINDING_SPACING: 200,
+  SUMMARY_Y: 720,
 } as const;
 
 const EDGE_STYLE = {
   stroke: '#06b6d4',
   strokeWidth: 2,
 } as const;
+
+const TOOL_TO_FINDING_TYPE: Record<string, string> = {
+  sanctions: 'sanction',
+  pep_check: 'pep',
+  adverse_media: 'adverse_media',
+  geo_risk: 'generic',
+  business_registry: 'company',
+};
 
 const TOOL_PATTERNS: Record<string, RegExp> = {
   sanctions: /src\.tools\.sanctions|sanctions\.py/,
@@ -80,8 +86,6 @@ const TOOL_PATTERNS: Record<string, RegExp> = {
   geo_risk: /src\.tools\.geo_risk|geo_risk\.py/,
   business_registry: /src\.tools\.business_registry|business_registry\.py/,
 };
-
-const WARNING_STATUSES = new Set(['match', 'alert', 'high', 'critical']);
 
 interface CanvasState {
   nodes: Node[];
@@ -98,7 +102,6 @@ interface CanvasState {
   sseConnected: boolean;
   sseError: string | null;
   statusInfo: StatusInfo | null;
-  toolUseIdToAgentId: Record<string, string>;
   shouldFitView: boolean;
 }
 
@@ -188,7 +191,6 @@ export const useCanvasStore = create<CanvasStore>()(
     sseConnected: false,
     sseError: null,
     statusInfo: null,
-    toolUseIdToAgentId: {},
     shouldFitView: false,
 
     onNodesChange: (changes) => {
@@ -366,26 +368,11 @@ export const useCanvasStore = create<CanvasStore>()(
           break;
 
         case 'agent_start':
-          handleAgentStart(message, get, set, createNodeWithId, createEdge, updateNodeData, nodes);
-          break;
-
-        case 'agent_progress':
-          updateNodeData(message.agent_id, {
-            status: 'streaming',
-            progress: message.payload.progress,
-            task: message.payload.task,
-          });
+          handleAgentStart(message, set);
           break;
 
         case 'agent_complete':
-          handleAgentComplete(message, set, updateNodeData);
-          break;
-
-        case 'agent_error':
-          updateNodeData(message.agent_id, {
-            status: 'failed',
-            error: message.payload.error,
-          });
+          handleAgentComplete(message, get, set, createNodeWithId, createEdge, nodes);
           break;
 
         case 'project_complete':
@@ -467,74 +454,115 @@ function handleProjectStart(
 
 function handleAgentStart(
   message: Extract<SSEMessage, { type: 'agent_start' }>,
-  get: () => CanvasState,
-  set: (state: Partial<CanvasState>) => void,
-  createNodeWithId: CanvasActions['createNodeWithId'],
-  createEdge: CanvasActions['createEdge'],
-  updateNodeData: CanvasActions['updateNodeData'],
-  nodes: Node[]
+  set: (state: Partial<CanvasState>) => void
 ) {
-  const entityId = get().entityNodeId;
-  const existingNode = nodes.find((n) => n.id === message.agent_id);
-
-  if (!existingNode && entityId) {
-    const agentCount = nodes.filter((n) => n.type === 'agent').length;
-    const position = calculateAgentPosition(agentCount);
-    const toolLabel = extractToolLabel(message.payload.task);
-
-    createNodeWithId(message.agent_id, 'agent', position, {
-      label: toolLabel,
-      status: 'running',
-      task: message.payload.task,
-    });
-    createEdge(entityId, message.agent_id);
-
-    set({
-      shouldFitView: true,
-      statusInfo: {
-        type: 'tool_call',
-        message: `Starting ${toolLabel}`,
-        tool: message.agent_id.split('-')[0],
-        description: message.payload.task,
-      },
-    });
-  } else if (existingNode) {
-    updateNodeData(message.agent_id, { status: 'running', task: message.payload.task });
-    set({
-      statusInfo: {
-        type: 'tool_call',
-        message: message.payload.task || 'Running...',
-        tool: message.agent_id.split('-')[0],
-        description: message.payload.task,
-      },
-    });
-  }
+  const toolLabel = extractToolLabel(message.payload.task);
+  set({
+    statusInfo: {
+      type: 'tool_call',
+      message: `Running ${toolLabel}`,
+      tool: message.agent_id.split('-')[0],
+      description: message.payload.task,
+    },
+  });
 }
 
 function handleAgentComplete(
   message: Extract<SSEMessage, { type: 'agent_complete' }>,
+  get: () => CanvasState,
   set: (state: Partial<CanvasState>) => void,
-  updateNodeData: CanvasActions['updateNodeData']
+  createNodeWithId: CanvasActions['createNodeWithId'],
+  createEdge: CanvasActions['createEdge'],
+  nodes: Node[]
 ) {
-  const toolName = message.agent_id.split('-')[0].replace('_', ' ');
-  const resultStatus = message.payload.status || 'done';
+  const toolKey = message.agent_id.split('-')[0];
+  const toolName = toolKey.replace('_', ' ');
   const isWarning = message.payload.resultType === 'warning';
+  const findings = message.payload.findings || [];
+  const entityId = get().entityNodeId;
 
-  updateNodeData(message.agent_id, {
-    status: isWarning ? 'warning' : 'completed',
-    resultType: message.payload.resultType,
-    findings: message.payload.findings,
-    confidence: message.payload.confidence,
+  if (!isWarning || findings.length === 0) {
+    set({
+      statusInfo: {
+        type: 'tool_result',
+        message: `${toolName}: clear`,
+        tool: toolKey,
+        description: `✓ ${toolName} - No matches`,
+      },
+    });
+    return;
+  }
+
+  const existingAgentNode = nodes.find((n) => n.id === message.agent_id);
+  if (!existingAgentNode && entityId) {
+    const agentCount = nodes.filter((n) => n.type === 'agent').length;
+    const position = calculateAgentPosition(agentCount);
+
+    createNodeWithId(message.agent_id, 'agent', position, {
+      label: toolName,
+      status: 'warning',
+      task: message.payload.task,
+      resultType: 'warning',
+      findings,
+      confidence: message.payload.confidence,
+    });
+    createEdge(entityId, message.agent_id);
+  }
+
+  const findingType = TOOL_TO_FINDING_TYPE[toolKey] || 'generic';
+  const baseX = calculateAgentPosition(nodes.filter((n) => n.type === 'agent').length - 1).x;
+
+  findings.slice(0, 5).forEach((finding: unknown, idx: number) => {
+    const f = finding as Record<string, unknown>;
+    const findingId = `finding-${message.agent_id}-${idx}`;
+    const offsetX = (idx - Math.min(findings.length - 1, 4) / 2) * LAYOUT.FINDING_SPACING;
+
+    const label = (f.name || f.title || f.entity || f.country || 'Finding') as string;
+    const description = (f.reason || f.description || f.source || '') as string;
+    const severity = determineSeverity(f);
+
+    createNodeWithId(findingId, 'finding', { x: baseX + offsetX, y: LAYOUT.FINDING_Y + idx * 20 }, {
+      label,
+      findingType: detectFindingType(f) || findingType,
+      source: toolName,
+      description,
+      severity,
+      confidence: message.payload.confidence,
+      metadata: f,
+    });
+    createEdge(message.agent_id, findingId);
   });
 
   set({
+    shouldFitView: true,
     statusInfo: {
       type: 'tool_result',
-      message: `${toolName}: ${resultStatus}`,
-      tool: message.agent_id.split('-')[0],
-      description: isWarning ? `⚠️ ${toolName} - Match found` : `✓ ${toolName} - Clear`,
+      message: `${toolName}: ${findings.length} match${findings.length > 1 ? 'es' : ''}`,
+      tool: toolKey,
+      description: `⚠️ ${toolName} - ${findings.length} finding${findings.length > 1 ? 's' : ''}`,
     },
   });
+}
+
+function determineSeverity(finding: Record<string, unknown>): 'low' | 'medium' | 'high' | 'critical' {
+  const status = String(finding.status || '').toLowerCase();
+  const score = Number(finding.score || finding.confidence || 50);
+
+  if (status === 'critical' || score >= 90) return 'critical';
+  if (status === 'high' || status === 'match' || score >= 70) return 'high';
+  if (status === 'medium' || score >= 40) return 'medium';
+  return 'low';
+}
+
+function detectFindingType(finding: Record<string, unknown>): string | null {
+  const text = JSON.stringify(finding).toLowerCase();
+
+  if (finding.ip_address || /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(text)) return 'ip_address';
+  if (finding.crypto_address || finding.wallet || /\b(0x[a-f0-9]{40}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})\b/i.test(text)) return 'crypto';
+  if (finding.company || finding.organization) return 'company';
+  if (finding.person || finding.individual) return 'person';
+
+  return null;
 }
 
 function handleProjectComplete(
@@ -578,7 +606,6 @@ function handleProjectComplete(
     activeProjectId: null,
     entityNodeId: null,
     statusInfo: { type: 'complete', message: 'Analysis complete' },
-    toolUseIdToAgentId: {},
     shouldFitView: true,
   });
 }
@@ -607,17 +634,9 @@ function handleTrace(
 
     if (item.name === 'Bash' && item.id && item.input?.command) {
       handleTraceBashCommand(
-        { id: item.id, input: { command: item.input.command, description: item.input.description } },
-        get,
+        { id: item.id, input: { command: item.input.command } },
         set
       );
-    }
-
-    if (item.tool_use_id && item.content) {
-      const agentId = get().toolUseIdToAgentId[item.tool_use_id];
-      if (agentId) {
-        updateNodeData(agentId, { streamingText: item.content.slice(0, 200) });
-      }
     }
   }
 }
@@ -656,27 +675,19 @@ function handleTraceText(text: string, set: (state: Partial<CanvasState>) => voi
 }
 
 function handleTraceBashCommand(
-  item: { id: string; input: { command: unknown; description?: unknown } },
-  get: () => CanvasState & CanvasActions,
+  item: { id: string; input: { command: unknown } },
   set: (state: Partial<CanvasState>) => void
 ) {
   const cmd = String(item.input.command);
-  const description = item.input.description as string | undefined;
   const toolKey = detectToolFromCommand(cmd);
 
   if (!toolKey) return;
 
-  const agentNodes = get().nodes.filter((n) => n.type === 'agent' && n.id.startsWith(toolKey));
-  if (agentNodes.length > 0) {
-    set({ toolUseIdToAgentId: { ...get().toolUseIdToAgentId, [item.id]: agentNodes[0].id } });
-  }
-
   set({
     statusInfo: {
       type: 'tool_call',
-      message: cmd,
+      message: `Running ${toolKey.replace('_', ' ')}...`,
       tool: toolKey,
-      description: description || `Running ${toolKey.replace('_', ' ')}...`,
     },
   });
 }

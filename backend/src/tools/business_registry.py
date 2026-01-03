@@ -4,12 +4,11 @@
 import json
 import os
 import sys
-import uuid
 from typing import Any
 
 import httpx
 
-from . import weave_op
+from . import weave_op, cuid
 
 TOOL_ID = "business_registry"
 
@@ -17,7 +16,7 @@ TOOL_ID = "business_registry"
 @weave_op
 def check(entity: str, jurisdiction: str = "") -> dict[str, Any]:
     """Search business registries for company information."""
-    result_id = f"{TOOL_ID}-{uuid.uuid4().hex[:8]}"
+    result_id = cuid()
 
     findings = _search_opencorporates(entity, jurisdiction)
 

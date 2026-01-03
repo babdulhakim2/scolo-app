@@ -1,8 +1,8 @@
 import type { Node } from '@xyflow/react';
 
-const NODE_WIDTH = 200;
-const NODE_HEIGHT = 100;
-const PADDING = 40;
+const NODE_WIDTH = 280;
+const NODE_HEIGHT = 120;
+const PADDING = 50;
 const GRID_SIZE = 20;
 
 interface BoundingBox {
@@ -64,7 +64,7 @@ export function findNonCollidingPosition(
     return { x: snapToGrid(targetPosition.x), y: snapToGrid(targetPosition.y) };
   }
 
-  const searchRadius = 800;
+  const searchRadius = 1200;
   const step = NODE_WIDTH + PADDING;
 
   for (let distance = step; distance < searchRadius; distance += step) {
@@ -125,48 +125,49 @@ export function organizeHierarchical(nodes: Node[]): Node[] {
     (n) => n.type !== 'entity' && n.type !== 'agent' && n.type !== 'summary'
   );
 
-  const LEVEL_Y = { entity: 100, agent: 300, summary: 520, other: 720 };
-  const SPACING = 280;
+  const LEVEL_Y = { entity: 80, agent: 320, summary: 580, other: 820 };
+  const HORIZONTAL_SPACING = 340;
+  const CENTER_X = 500;
 
   const positioned: Node[] = [];
 
   entityNodes.forEach((node, idx) => {
-    const totalWidth = (entityNodes.length - 1) * SPACING;
-    const startX = 500 - totalWidth / 2;
+    const totalWidth = (entityNodes.length - 1) * HORIZONTAL_SPACING;
+    const startX = CENTER_X - totalWidth / 2;
     positioned.push({
       ...node,
-      position: { x: snapToGrid(startX + idx * SPACING), y: LEVEL_Y.entity },
+      position: { x: snapToGrid(startX + idx * HORIZONTAL_SPACING), y: LEVEL_Y.entity },
     });
   });
 
   agentNodes.forEach((node, idx) => {
-    const totalWidth = (agentNodes.length - 1) * SPACING;
-    const startX = 500 - totalWidth / 2;
+    const totalWidth = (agentNodes.length - 1) * HORIZONTAL_SPACING;
+    const startX = CENTER_X - totalWidth / 2;
     positioned.push({
       ...node,
-      position: { x: snapToGrid(startX + idx * SPACING), y: LEVEL_Y.agent },
+      position: { x: snapToGrid(startX + idx * HORIZONTAL_SPACING), y: LEVEL_Y.agent },
     });
   });
 
   summaryNodes.forEach((node, idx) => {
-    const totalWidth = (summaryNodes.length - 1) * SPACING;
-    const startX = 500 - totalWidth / 2;
+    const totalWidth = (summaryNodes.length - 1) * HORIZONTAL_SPACING;
+    const startX = CENTER_X - totalWidth / 2;
     positioned.push({
       ...node,
-      position: { x: snapToGrid(startX + idx * SPACING), y: LEVEL_Y.summary },
+      position: { x: snapToGrid(startX + idx * HORIZONTAL_SPACING), y: LEVEL_Y.summary },
     });
   });
 
   otherNodes.forEach((node, idx) => {
-    const totalWidth = (otherNodes.length - 1) * SPACING;
-    const startX = 500 - totalWidth / 2;
+    const totalWidth = (otherNodes.length - 1) * HORIZONTAL_SPACING;
+    const startX = CENTER_X - totalWidth / 2;
     positioned.push({
       ...node,
-      position: { x: snapToGrid(startX + idx * SPACING), y: LEVEL_Y.other },
+      position: { x: snapToGrid(startX + idx * HORIZONTAL_SPACING), y: LEVEL_Y.other },
     });
   });
 
-  return positioned;
+  return resolveAllCollisions(positioned);
 }
 
 export function resolveAllCollisions(nodes: Node[]): Node[] {

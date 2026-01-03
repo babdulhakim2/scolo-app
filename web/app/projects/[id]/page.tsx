@@ -1,8 +1,7 @@
 import ScoloCanvas from '@/app/components/canvas/ScoloCanvas';
 import { createClient } from '@/lib/supabase/server';
 import { redirect, notFound } from 'next/navigation';
-import { requireDb, projects } from '@/lib/db';
-import { eq, and } from 'drizzle-orm';
+import { loadInitialCanvasData } from '@/lib/data/loaders';
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -18,17 +17,21 @@ export default async function ProjectPage({ params }: PageProps) {
   }
 
   try {
-    const db = requireDb();
-    const [project] = await db
-      .select()
-      .from(projects)
-      .where(and(eq(projects.id, id), eq(projects.userId, user.id)));
+    const initialData = await loadInitialCanvasData(user.id, user.email || '', id);
 
-    if (!project) {
+    if (!initialData.currentProject) {
       notFound();
     }
 
-    return <ScoloCanvas projectId={id} />;
+    return (
+      <ScoloCanvas
+        projectId={id}
+        initialProjects={initialData.projects}
+        initialUser={initialData.user}
+        initialNodes={initialData.currentProject.nodes}
+        initialEdges={initialData.currentProject.edges}
+      />
+    );
   } catch (error) {
     console.error('Failed to fetch project:', error);
     notFound();

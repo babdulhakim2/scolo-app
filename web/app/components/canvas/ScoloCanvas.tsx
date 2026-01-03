@@ -7,31 +7,45 @@ import {
   BackgroundVariant,
   Controls,
   Node,
+  Edge,
   ReactFlowProvider,
   useReactFlow,
+  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import { useCanvasStore } from '@/app/store/canvas-store';
+import { useCanvasStore, type Project } from '@/app/store/canvas-store';
 import { EntityNode } from '@/app/components/nodes/EntityNode';
 import { AgentNode } from '@/app/components/nodes/AgentNode';
 import { SummaryNode } from '@/app/components/nodes/SummaryNode';
+import { FindingNode } from '@/app/components/nodes/FindingNode';
 import { CanvasControls } from './CanvasControls';
 import { CommandBar } from './CommandBar';
 import { LeftPanel } from '@/app/components/panels/LeftPanel';
 import { DetailPanel } from '@/app/components/panels/DetailPanel';
+import type { LoadedNode, LoadedEdge } from '@/lib/data/loaders';
 
 const nodeTypes = {
   entity: EntityNode,
   agent: AgentNode,
   summary: SummaryNode,
+  finding: FindingNode,
 };
+
+const EDGE_STYLE = {
+  stroke: '#06b6d4',
+  strokeWidth: 2,
+} as const;
 
 interface CanvasProps {
   projectId?: string;
+  initialProjects?: Project[];
+  initialUser?: { id: string; email: string } | null;
+  initialNodes?: LoadedNode[];
+  initialEdges?: LoadedEdge[];
 }
 
-function Canvas({ projectId }: CanvasProps) {
+function Canvas({ projectId, initialProjects, initialUser, initialNodes, initialEdges }: CanvasProps) {
   const {
     nodes,
     edges,
@@ -45,27 +59,52 @@ function Canvas({ projectId }: CanvasProps) {
     selectNode,
     clearSelection,
     setShouldFitView,
-    loadProject,
     setActiveProjectId,
-    fetchProjects,
+    setNodes,
+    setEdges,
+    setProjects,
+    deleteNode,
   } = useCanvasStore();
 
   const { fitView } = useReactFlow();
   const fitViewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastFitViewRef = useRef<number>(0);
-  const hasLoadedRef = useRef(false);
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
 
-  useEffect(() => {
-    if (projectId && projectId !== activeProjectId && !hasLoadedRef.current) {
-      hasLoadedRef.current = true;
-      setActiveProjectId(projectId);
-      loadProject(projectId);
+    if (initialProjects) {
+      setProjects(initialProjects);
     }
-  }, [projectId, activeProjectId, setActiveProjectId, loadProject]);
+
+    if (projectId) {
+      setActiveProjectId(projectId);
+
+      if (initialNodes && initialEdges) {
+        const reactFlowNodes: Node[] = initialNodes.map((n) => ({
+          id: n.id,
+          type: n.type,
+          position: { x: n.positionX, y: n.positionY },
+          data: { ...n.data, label: n.label, onDelete: () => deleteNode(n.id) },
+        }));
+
+        const reactFlowEdges: Edge[] = initialEdges.map((e) => ({
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          animated: e.animated,
+          style: EDGE_STYLE,
+          markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_STYLE.stroke },
+        }));
+
+        setNodes(reactFlowNodes);
+        setEdges(reactFlowEdges);
+        setShouldFitView(true);
+      }
+    }
+  }, [projectId, initialProjects, initialNodes, initialEdges, setProjects, setActiveProjectId, setNodes, setEdges, setShouldFitView, deleteNode]);
 
   useEffect(() => {
     if (shouldFitView && nodes.length > 0) {
@@ -118,7 +157,7 @@ function Canvas({ projectId }: CanvasProps) {
 
   return (
     <div className="w-full h-screen bg-slate-50 flex overflow-hidden">
-      <LeftPanel />
+      <LeftPanel initialUser={initialUser} initialProjects={initialProjects} />
 
       <div className="flex-1 h-full relative">
         <ReactFlow
@@ -139,7 +178,7 @@ function Canvas({ projectId }: CanvasProps) {
             className="!bg-white/90 !backdrop-blur-sm !border-slate-200 !shadow-lg !rounded-xl"
             showInteractive={false}
           />
-          <CanvasControls />
+          <CanvasControls hasProjects={initialProjects && initialProjects.length > 0} />
           <CommandBar />
         </ReactFlow>
       </div>
@@ -151,12 +190,28 @@ function Canvas({ projectId }: CanvasProps) {
 
 interface ScoloCanvasProps {
   projectId?: string;
+  initialProjects?: Project[];
+  initialUser?: { id: string; email: string } | null;
+  initialNodes?: LoadedNode[];
+  initialEdges?: LoadedEdge[];
 }
 
-export default function ScoloCanvas({ projectId }: ScoloCanvasProps) {
+export default function ScoloCanvas({
+  projectId,
+  initialProjects,
+  initialUser,
+  initialNodes,
+  initialEdges,
+}: ScoloCanvasProps) {
   return (
     <ReactFlowProvider>
-      <Canvas projectId={projectId} />
+      <Canvas
+        projectId={projectId}
+        initialProjects={initialProjects}
+        initialUser={initialUser}
+        initialNodes={initialNodes}
+        initialEdges={initialEdges}
+      />
     </ReactFlowProvider>
   );
 }

@@ -4,12 +4,11 @@
 import json
 import os
 import sys
-import uuid
 from typing import Any
 
 import httpx
 
-from . import weave_op
+from . import weave_op, cuid
 
 TOOL_ID = "adverse_media"
 
@@ -17,7 +16,7 @@ TOOL_ID = "adverse_media"
 @weave_op
 def check(entity: str, **opts) -> dict[str, Any]:
     """Search news sources for adverse media about entity."""
-    result_id = f"{TOOL_ID}-{uuid.uuid4().hex[:8]}"
+    result_id = cuid()
 
     findings = []
     findings.extend(_search_gdelt(entity))

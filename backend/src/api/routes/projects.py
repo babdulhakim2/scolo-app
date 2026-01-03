@@ -1,7 +1,6 @@
 """Project management API routes."""
 
 import time
-import uuid
 from typing import ClassVar
 
 from cuid2 import cuid_wrapper
@@ -80,7 +79,7 @@ def generate_project_id() -> str:
 
 
 def generate_tool_id(tool_key: str) -> str:
-    return f"{tool_key}-{uuid.uuid4().hex[:6]}"
+    return cuid()
 
 
 def build_tool_infos(tool_keys: list[str]) -> list[dict]:

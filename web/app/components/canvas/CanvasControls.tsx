@@ -4,14 +4,20 @@ import { Panel } from '@xyflow/react';
 import { Activity } from 'lucide-react';
 import { useCanvasStore } from '@/app/store/canvas-store';
 
-export function CanvasControls() {
-  return <EmptyState />;
+interface CanvasControlsProps {
+  hasProjects?: boolean;
 }
 
-function EmptyState() {
-  const { nodes, isProcessing } = useCanvasStore();
+export function CanvasControls({ hasProjects }: CanvasControlsProps) {
+  return <EmptyState hasProjects={hasProjects} />;
+}
 
-  if (nodes.length > 0 || isProcessing) return null;
+function EmptyState({ hasProjects }: { hasProjects?: boolean }) {
+  const { nodes, projects, isProcessing } = useCanvasStore();
+
+  const hasAnyProjects = hasProjects ?? projects.length > 0;
+
+  if (nodes.length > 0 || isProcessing || hasAnyProjects) return null;
 
   return (
     <Panel position="top-center" className="mt-20">

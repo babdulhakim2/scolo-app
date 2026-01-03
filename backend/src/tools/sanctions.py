@@ -5,10 +5,9 @@ import json
 import os
 import sys
 import time
-import uuid
 from typing import Any
 
-from . import weave_op
+from . import weave_op, cuid
 
 TOOL_ID = "sanctions"
 
@@ -57,7 +56,7 @@ def normalize(name: str) -> str:
 @weave_op
 def check(entity: str, entity_type: str = "Person") -> dict[str, Any]:
     """Check entity against sanctions databases."""
-    result_id = f"{TOOL_ID}-{uuid.uuid4().hex[:8]}"
+    result_id = cuid()
     print(f"[{TOOL_ID}] Checking: {entity}", file=sys.stderr)
 
     # TODO: Uncomment for real API

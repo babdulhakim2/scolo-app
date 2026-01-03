@@ -1,5 +1,7 @@
 import os
 
+from cuid2 import cuid_wrapper
+
 try:
     import weave
     if os.getenv("WEAVE_PROJECT"):
@@ -10,6 +12,8 @@ try:
 except ImportError:
     WEAVE_ENABLED = False
     weave = None
+
+cuid = cuid_wrapper()
 
 
 def weave_op(func):
