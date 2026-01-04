@@ -22,6 +22,18 @@ TOOL_PATTERNS = {
     "adverse_media": re.compile(r"(?:adverse_media\.py|src\.tools\.adverse_media|tools/adverse_media)"),
     "geo_risk": re.compile(r"(?:geo_risk\.py|src\.tools\.geo_risk|tools/geo_risk)"),
     "business_registry": re.compile(r"(?:business_registry\.py|src\.tools\.business_registry|tools/business_registry)"),
+    "ubo_lookup": re.compile(r"(?:ubo_lookup\.py|src\.tools\.ubo_lookup|tools/ubo_lookup)"),
+    "employment_verify": re.compile(r"(?:employment_verify\.py|src\.tools\.employment_verify|tools/employment_verify)"),
+    "education_verify": re.compile(r"(?:education_verify\.py|src\.tools\.education_verify|tools/education_verify)"),
+    "court_records": re.compile(r"(?:court_records\.py|src\.tools\.court_records|tools/court_records)"),
+    "property_records": re.compile(r"(?:property_records\.py|src\.tools\.property_records|tools/property_records)"),
+    "corporate_filings": re.compile(r"(?:corporate_filings\.py|src\.tools\.corporate_filings|tools/corporate_filings)"),
+    "phone_lookup": re.compile(r"(?:phone_lookup\.py|src\.tools\.phone_lookup|tools/phone_lookup)"),
+    "email_lookup": re.compile(r"(?:email_lookup\.py|src\.tools\.email_lookup|tools/email_lookup)"),
+    "social_media": re.compile(r"(?:social_media\.py|src\.tools\.social_media|tools/social_media)"),
+    "domain_whois": re.compile(r"(?:domain_whois\.py|src\.tools\.domain_whois|tools/domain_whois)"),
+    "ip_geolocation": re.compile(r"(?:ip_geolocation\.py|src\.tools\.ip_geolocation|tools/ip_geolocation)"),
+    "crypto_trace": re.compile(r"(?:crypto_trace\.py|src\.tools\.crypto_trace|tools/crypto_trace)"),
 }
 
 WARNING_STATUSES = frozenset({"match", "alert", "high", "critical"})
@@ -94,6 +106,22 @@ def build_tool_commands(entity_name: str, country: str) -> dict[str, str]:
         "adverse_media": f'python -m src.tools.adverse_media "{entity_name}"',
         "geo_risk": f'python -m src.tools.geo_risk "{country or "US"}"',
         "business_registry": f'python -m src.tools.business_registry "{entity_name}"',
+        "ubos": f'python -m src.tools.ubos "{entity_name}"',
+        "court_records": f'python -m src.tools.court_records "{entity_name}"',
+        "property_records": f'python -m src.tools.property_records "{entity_name}"',
+        "corporate_filings": f'python -m src.tools.corporate_filings "{entity_name}"',
+        "employment_verification": f'python -m src.tools.employment_verification "{entity_name}"',
+        "education_verification": f'python -m src.tools.education_verification "{entity_name}"',
+        "social_media": f'python -m src.tools.social_media "{entity_name}"',
+        "domain_whois": f'python -m src.tools.domain_whois "{entity_name}"',
+        "ip_geolocation": f'python -m src.tools.ip_geolocation "{entity_name}"',
+        "crypto_trace": f'python -m src.tools.crypto_trace "{entity_name}"',
+        "phone_lookup": f'python -m src.tools.phone_lookup "{entity_name}"',
+        "email_lookup": f'python -m src.tools.email_lookup "{entity_name}"',
+        "social_media": f'python -m src.tools.social_media "{entity_name}"',
+        "domain_whois": f'python -m src.tools.domain_whois "{entity_name}"',
+        "ip_geolocation": f'python -m src.tools.ip_geolocation "{entity_name}"',    
+        "crypto_trace": f'python -m src.tools.crypto_trace "{entity_name}"',
     }
 
 
