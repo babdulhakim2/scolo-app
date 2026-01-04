@@ -1,3 +1,4 @@
 {
-    "allowed_tools":["Skills"]
+    "allowed_tools": ["Skills"],
+    "setting_sources": ["user", "project"]
 }

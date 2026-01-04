@@ -99,7 +99,7 @@ export const AgentNode = memo(({ id, data }: NodeProps) => {
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative bg-white border ${personality.border} rounded-2xl shadow-lg transition-all duration-300 min-w-[260px] overflow-visible group hover:shadow-xl`}
+      className={`relative bg-black/20 backdrop-blur-md border ${personality.border} rounded-2xl shadow-2xl transition-all duration-300 min-w-[260px] overflow-visible group hover:scale-105 hover:bg-black/30 grain`}
     >
       <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-2xl ${personality.color}`} />
 
@@ -130,7 +130,7 @@ export const AgentNode = memo(({ id, data }: NodeProps) => {
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <span className="text-lg">{personality.emoji}</span>
-              <div className="text-slate-900 font-semibold text-sm">{nodeData.label}</div>
+              <div className="text-white font-semibold text-sm">{nodeData.label}</div>
             </div>
             <div className="flex items-center gap-2 mt-1">
               <span
@@ -140,12 +140,12 @@ export const AgentNode = memo(({ id, data }: NodeProps) => {
                 {statusConfig.text}
               </span>
               {nodeData.findings && nodeData.findings.length > 0 && (
-                <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">
+                <span className="px-2 py-0.5 bg-black/40 text-white/70 text-xs rounded-full font-medium">
                   {nodeData.findings.length} findings
                 </span>
               )}
               {nodeData.confidence && (
-                <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-xs rounded-full font-medium">
+                <span className="px-2 py-0.5 bg-black/40 text-white/60 text-xs rounded-full font-medium">
                   {nodeData.confidence}%
                 </span>
               )}
@@ -155,7 +155,7 @@ export const AgentNode = memo(({ id, data }: NodeProps) => {
         </div>
 
         {(nodeData.status === 'running' || nodeData.status === 'streaming') && (
-          <div className="relative h-1 bg-slate-100 rounded-full overflow-hidden">
+          <div className="relative h-1 bg-white/10 rounded-full overflow-hidden">
             <div
               className={`h-full ${personality.color} transition-all duration-300 animate-pulse`}
               style={{ width: '100%' }}
@@ -175,13 +175,13 @@ export const AgentNode = memo(({ id, data }: NodeProps) => {
               const f = finding as Record<string, unknown>;
               const name = f.name || f.title || f.country || 'Finding';
               return (
-                <div key={idx} className="px-2 py-1 bg-slate-50 border border-slate-100 rounded text-xs text-slate-600 truncate">
+                <div key={idx} className="px-2 py-1 bg-black/20 border border-white/10 rounded text-xs text-white/70 truncate">
                   {String(name)}
                 </div>
               );
             })}
             {nodeData.findings.length > 2 && (
-              <div className="text-xs text-slate-400 px-2">+{nodeData.findings.length - 2} more</div>
+              <div className="text-xs text-white/50 px-2">+{nodeData.findings.length - 2} more</div>
             )}
           </div>
         )}

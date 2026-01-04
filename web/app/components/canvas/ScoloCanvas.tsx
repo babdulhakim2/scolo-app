@@ -19,6 +19,7 @@ import { EntityNode } from '@/app/components/nodes/EntityNode';
 import { AgentNode } from '@/app/components/nodes/AgentNode';
 import { SummaryNode } from '@/app/components/nodes/SummaryNode';
 import { FindingNode } from '@/app/components/nodes/FindingNode';
+import { CircularNode } from '@/app/components/nodes/CircularNode';
 import { CanvasControls } from './CanvasControls';
 import { CommandBar } from './CommandBar';
 import { LeftPanel } from '@/app/components/panels/LeftPanel';
@@ -30,6 +31,7 @@ const nodeTypes = {
   agent: AgentNode,
   summary: SummaryNode,
   finding: FindingNode,
+  circular: CircularNode,
 };
 
 const EDGE_STYLE = {
@@ -156,7 +158,7 @@ function Canvas({ projectId, initialProjects, initialUser, initialNodes, initial
   const proOptions = useMemo(() => ({ hideAttribution: true }), []);
 
   return (
-    <div className="w-full h-screen bg-slate-50 flex overflow-hidden">
+    <div className="w-full h-screen bg-[#050510] flex overflow-hidden">
       <LeftPanel initialUser={initialUser} initialProjects={initialProjects} />
 
       <div className="flex-1 h-full relative">
@@ -171,11 +173,11 @@ function Canvas({ projectId, initialProjects, initialUser, initialNodes, initial
           onPaneClick={handlePaneClick}
           proOptions={proOptions}
           fitView
-          className="bg-slate-100"
+          className="bg-gradient-to-br from-[#050510] via-[#0a0a1a] to-[#0f0f20]"
         >
-          <Background variant={BackgroundVariant.Dots} color="#94a3b8" gap={16} size={1.5} />
+          <Background variant={BackgroundVariant.Dots} color="#06b6d4" gap={20} size={1} className="opacity-20" />
           <Controls
-            className="!bg-white/90 !backdrop-blur-sm !border-slate-200 !shadow-lg !rounded-xl"
+            className="!bg-black/20 !backdrop-blur-md !border-white/10 !shadow-xl !rounded-xl"
             showInteractive={false}
           />
           <CanvasControls hasProjects={initialProjects && initialProjects.length > 0} />

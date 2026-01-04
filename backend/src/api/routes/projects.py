@@ -16,13 +16,31 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 TOOL_CONFIG: dict[str, dict[str, str]] = {
     "sanctions": {"name": "Sanctions Check", "icon": "shield"},
-    "adverse_media": {"name": "Adverse Media", "icon": "newspaper"},
-    "business_registry": {"name": "Business Registry", "icon": "building"},
     "pep_check": {"name": "PEP Screening", "icon": "user"},
+    "adverse_media": {"name": "Adverse Media", "icon": "newspaper"},
     "geo_risk": {"name": "Geographic Risk", "icon": "globe"},
+    "business_registry": {"name": "Business Registry", "icon": "building"},
+    "ubo_lookup": {"name": "UBO Lookup", "icon": "users"},
+    "court_records": {"name": "Court Records", "icon": "gavel"},
+    "property_records": {"name": "Property Records", "icon": "home"},
+    "corporate_filings": {"name": "Corporate Filings", "icon": "file-text"},
+    "employment_verify": {"name": "Employment Verification", "icon": "briefcase"},
+    "education_verify": {"name": "Education Verification", "icon": "graduation-cap"},
+    "phone_lookup": {"name": "Phone Lookup", "icon": "phone"},
+    "email_lookup": {"name": "Email Lookup", "icon": "mail"},
+    "social_media": {"name": "Social Media", "icon": "at-sign"},
+    "domain_whois": {"name": "Domain WHOIS", "icon": "globe"},
+    "ip_geolocation": {"name": "IP Geolocation", "icon": "map-pin"},
+    "crypto_trace": {"name": "Crypto Trace", "icon": "wallet"},
 }
 
-DEFAULT_TOOLS = ["sanctions", "pep_check", "adverse_media", "geo_risk"]
+DEFAULT_TOOLS = [
+    "sanctions", "pep_check", "adverse_media", "geo_risk",
+    "business_registry", "ubo_lookup", "court_records", "property_records",
+    "corporate_filings", "employment_verify", "education_verify",
+    "phone_lookup", "email_lookup", "social_media", "domain_whois",
+    "ip_geolocation", "crypto_trace"
+]
 
 
 class ProjectStore:

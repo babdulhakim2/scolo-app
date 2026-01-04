@@ -26,9 +26,9 @@ export const EntityNode = memo(({ id, data }: NodeProps) => {
   const nodeData = data as EntityNodeData;
 
   const getRiskBorder = () => {
-    if (nodeData.riskScore >= 70) return 'border-red-200';
-    if (nodeData.riskScore >= 40) return 'border-amber-200';
-    return 'border-slate-200';
+    if (nodeData.riskScore >= 70) return 'border-red-500/50 shadow-lg shadow-red-500/20';
+    if (nodeData.riskScore >= 40) return 'border-amber-500/50 shadow-lg shadow-amber-500/20';
+    return 'border-white/20';
   };
 
   const getStatusConfig = () => {
@@ -53,7 +53,7 @@ export const EntityNode = memo(({ id, data }: NodeProps) => {
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative bg-white border ${getRiskBorder()} rounded-2xl shadow-lg transition-all duration-300 min-w-[280px] overflow-visible group hover:shadow-xl`}
+      className={`relative bg-black/20 backdrop-blur-md border ${getRiskBorder()} rounded-2xl transition-all duration-300 min-w-[280px] overflow-visible group hover:scale-105 hover:bg-black/30 grain`}
     >
       <div
         className={`absolute top-0 left-0 right-0 h-1 rounded-t-2xl ${
@@ -65,24 +65,24 @@ export const EntityNode = memo(({ id, data }: NodeProps) => {
         }`}
       />
 
-      <Handle type="target" position={Position.Top} className="!w-3 !h-3 !bg-cyan-500 !border-2 !border-white !shadow-lg" />
+      <Handle type="target" position={Position.Top} className="!w-3 !h-3 !bg-gradient-to-r !from-cyan-400 !to-blue-500 !border-2 !border-white/30 !shadow-lg !shadow-cyan-500/30" />
 
       {isHovered && nodeData.onDelete && (
         <button
           onClick={() => nodeData.onDelete?.(id)}
-          className="absolute -top-3 -right-3 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100 z-50 hover:scale-110"
+          className="absolute -top-3 -right-3 w-7 h-7 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-full flex items-center justify-center shadow-lg shadow-red-500/30 transition-all opacity-0 group-hover:opacity-100 z-50 hover:scale-110"
         >
           <X className="w-3.5 h-3.5" />
         </button>
       )}
 
-      <div className="px-4 py-3 border-b border-slate-100">
+      <div className="px-4 py-3 border-b border-white/10">
         <div className="flex items-start gap-3">
           <div
-            className={`p-2.5 rounded-xl ${
+            className={`p-2.5 rounded-xl shadow-lg ${
               nodeData.entityType === 'Company'
-                ? 'bg-cyan-500'
-                : 'bg-blue-500'
+                ? 'bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-cyan-500/30'
+                : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/30'
             }`}
           >
             {nodeData.entityType === 'Company' ? (
@@ -92,9 +92,9 @@ export const EntityNode = memo(({ id, data }: NodeProps) => {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-slate-900 font-semibold text-sm truncate">{nodeData.label}</div>
+            <div className="text-white font-semibold text-sm truncate">{nodeData.label}</div>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs text-slate-500">{nodeData.entityType}</span>
+              <span className="text-xs text-white/60">{nodeData.entityType}</span>
               {nodeData.status === 'flagged' && (
                 <div className="flex items-center gap-1 text-red-500 animate-pulse">
                   <AlertTriangle className="w-3 h-3" />
@@ -187,7 +187,7 @@ export const EntityNode = memo(({ id, data }: NodeProps) => {
       </div>
 
 
-      <Handle type="source" position={Position.Bottom} className="!w-3 !h-3 !bg-cyan-500 !border-2 !border-white !shadow-lg" />
+      <Handle type="source" position={Position.Bottom} className="!w-3 !h-3 !bg-gradient-to-r !from-cyan-400 !to-blue-500 !border-2 !border-white/30 !shadow-lg !shadow-cyan-500/30" />
     </div>
   );
 });

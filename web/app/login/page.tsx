@@ -2,8 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield, Mail, ArrowRight, Loader2 } from 'lucide-react';
+import { Shield, Mail, ArrowRight, Loader2, ChevronLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { SpaceBackground } from '@/app/components/ui/SpaceBackground';
+import { NoiseOverlay } from '@/app/components/ui/NoiseOverlay';
+import { GlassCard } from '@/app/components/ui/GlassCard';
+import Link from 'next/link';
 
 type Step = 'email' | 'otp';
 
@@ -65,108 +69,148 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-cyan-500/20">
-            <Shield className="w-7 h-7 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900">Scolo</h1>
-          <p className="text-slate-500 text-sm mt-1">Discovery Platform</p>
-        </div>
+    <>
+      <SpaceBackground />
+      <NoiseOverlay />
 
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
-          {step === 'email' ? (
-            <form onSubmit={handleSendOtp} className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Email address
-                </label>
+      <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
+        <div className="w-full max-w-md">
+          {/* Back to Home */}
+          <Link href="/landing" className="inline-flex items-center gap-2 text-white/60 hover:text-white mb-8 transition-colors">
+            <ChevronLeft className="w-4 h-4" />
+            Back to Home
+          </Link>
+
+          {/* Logo and Title */}
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-cyan-500/20">
+              <Shield className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold font-[family-name:var(--font-space-grotesk)] gradient-text mb-2">
+              Welcome to Scolo
+            </h1>
+            <p className="text-white/60">Intelligence Canvas for Due Diligence</p>
+          </div>
+
+          {/* Login Form */}
+          <GlassCard className="p-8">
+            {step === 'email' ? (
+              <form onSubmit={handleSendOtp} className="space-y-5">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
+                    Email address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@company.com"
+                      className="w-full pl-12 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <p className="text-red-400 text-sm">{error}</p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading || !email.trim()}
+                  className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      Continue with Email
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/10" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-transparent text-white/40">or</span>
+                  </div>
+                </div>
+
+                <p className="text-center text-white/40 text-sm">
+                  By continuing, you agree to our{' '}
+                  <Link href="#" className="text-cyan-400 hover:text-cyan-300 transition-colors">
+                    Terms
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="#" className="text-cyan-400 hover:text-cyan-300 transition-colors">
+                    Privacy Policy
+                  </Link>
+                </p>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOtp} className="space-y-5">
+                <div>
+                  <p className="text-white/80 mb-4">
+                    We sent a verification code to{' '}
+                    <span className="font-semibold text-white">{email}</span>
+                  </p>
+                  <label htmlFor="otp" className="block text-sm font-medium text-white/80 mb-2">
+                    Verification code
+                  </label>
                   <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@company.com"
-                    className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                    id="otp"
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="Enter 6-digit code"
+                    className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white text-center text-xl tracking-widest placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all font-mono"
                     autoFocus
+                    maxLength={6}
                   />
                 </div>
-              </div>
 
-              {error && (
-                <p className="text-red-500 text-sm">{error}</p>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading || !email.trim()}
-                className="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    Continue
-                    <ArrowRight className="w-4 h-4" />
-                  </>
+                {error && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <p className="text-red-400 text-sm">{error}</p>
+                  </div>
                 )}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div>
-                <p className="text-sm text-slate-600 mb-4">
-                  We sent a code to <span className="font-medium text-slate-900">{email}</span>
-                </p>
-                <label htmlFor="otp" className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Verification code
-                </label>
-                <input
-                  id="otp"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter 6-digit code"
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                  autoFocus
-                  maxLength={6}
-                />
-              </div>
 
-              {error && (
-                <p className="text-red-500 text-sm">{error}</p>
-              )}
+                <button
+                  type="submit"
+                  disabled={loading || !otp.trim()}
+                  className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    'Verify & Continue'
+                  )}
+                </button>
 
-              <button
-                type="submit"
-                disabled={loading || !otp.trim()}
-                className="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  'Verify'
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setStep('email');
-                  setOtp('');
-                  setError('');
-                }}
-                className="w-full text-sm text-slate-500 hover:text-slate-700 transition-colors"
-              >
-                Use a different email
-              </button>
-            </form>
-          )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep('email');
+                    setOtp('');
+                    setError('');
+                  }}
+                  className="w-full text-sm text-white/40 hover:text-white/60 transition-colors"
+                >
+                  Use a different email
+                </button>
+              </form>
+            )}
+          </GlassCard>
         </div>
       </div>
-    </div>
+    </>
   );
 }

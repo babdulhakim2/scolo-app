@@ -64,11 +64,15 @@ def to_dict(obj: Any) -> Any:
 
 def detect_tool_from_command(command: str) -> str | None:
     """Detect which compliance tool a command invokes."""
+    logger.debug("Detecting tool from command: %s", command[:100])
     if not command.strip().startswith("python"):
+        logger.debug("Command doesn't start with python")
         return None
     for tool_key, pattern in TOOL_PATTERNS.items():
         if pattern.search(command):
+            logger.info("Detected tool: %s from command: %s", tool_key, command[:50])
             return tool_key
+    logger.warning("No tool detected from command: %s", command[:100])
     return None
 
 
@@ -106,21 +110,17 @@ def build_tool_commands(entity_name: str, country: str) -> dict[str, str]:
         "adverse_media": f'python -m src.tools.adverse_media "{entity_name}"',
         "geo_risk": f'python -m src.tools.geo_risk "{country or "US"}"',
         "business_registry": f'python -m src.tools.business_registry "{entity_name}"',
-        "ubos": f'python -m src.tools.ubos "{entity_name}"',
+        "ubo_lookup": f'python -m src.tools.ubo_lookup "{entity_name}"',
         "court_records": f'python -m src.tools.court_records "{entity_name}"',
         "property_records": f'python -m src.tools.property_records "{entity_name}"',
         "corporate_filings": f'python -m src.tools.corporate_filings "{entity_name}"',
-        "employment_verification": f'python -m src.tools.employment_verification "{entity_name}"',
-        "education_verification": f'python -m src.tools.education_verification "{entity_name}"',
-        "social_media": f'python -m src.tools.social_media "{entity_name}"',
-        "domain_whois": f'python -m src.tools.domain_whois "{entity_name}"',
-        "ip_geolocation": f'python -m src.tools.ip_geolocation "{entity_name}"',
-        "crypto_trace": f'python -m src.tools.crypto_trace "{entity_name}"',
+        "employment_verify": f'python -m src.tools.employment_verify "{entity_name}"',
+        "education_verify": f'python -m src.tools.education_verify "{entity_name}"',
         "phone_lookup": f'python -m src.tools.phone_lookup "{entity_name}"',
         "email_lookup": f'python -m src.tools.email_lookup "{entity_name}"',
         "social_media": f'python -m src.tools.social_media "{entity_name}"',
         "domain_whois": f'python -m src.tools.domain_whois "{entity_name}"',
-        "ip_geolocation": f'python -m src.tools.ip_geolocation "{entity_name}"',    
+        "ip_geolocation": f'python -m src.tools.ip_geolocation "{entity_name}"',
         "crypto_trace": f'python -m src.tools.crypto_trace "{entity_name}"',
     }
 
@@ -200,11 +200,19 @@ class ClaudeService:
         ]
         return f"""Investigate "{entity_name}" ({entity_type}) for compliance risk.
 
+IMPORTANT: You MUST run ALL {len(instructions)} tools listed below. Run them in parallel for efficiency.
+
 Run these exact commands (do NOT modify them):
 {chr(10).join(instructions)}
 
-Run all commands in parallel. Do NOT use TodoWrite or explore the codebase.
-After all complete, provide a brief risk summary."""
+Instructions:
+1. Run ALL commands above in parallel using the Bash tool
+2. Each command MUST be executed - do not skip any
+3. Wait for all results before proceeding
+4. Do NOT use TodoWrite or explore the codebase
+5. After ALL tools complete, provide a brief risk summary
+
+Begin by running all {len(instructions)} tools now."""
 
     async def _stream_agent(
         self,
@@ -272,19 +280,26 @@ After all complete, provide a brief risk summary."""
     ) -> str | None:
         command = item["input"].get("command", "")
         tool_use_id = item.get("id", "")
+        logger.debug("Processing bash call with command: %s", command[:100])
         detected_tool = detect_tool_from_command(command)
 
-        if not detected_tool or detected_tool not in tool_map:
+        if not detected_tool:
+            logger.debug("No tool detected from bash call")
+            return None
+        if detected_tool not in tool_map:
+            logger.warning("Detected tool %s not in tool_map: %s", detected_tool, list(tool_map.keys()))
             return None
 
         tool_info = tool_map[detected_tool]
         pending_calls[tool_use_id] = detected_tool
+        logger.info("Tool %s detected, adding to pending calls with id %s", detected_tool, tool_use_id)
 
         if detected_tool not in started_tools:
             started_tools.add(detected_tool)
+            logger.info("Sending agent_start event for tool: %s", tool_info['name'])
             return format_sse_event(
                 "agent_start", project_id, tool_info["id"],
-                {"task": f"Running {tool_info['name']}..."}
+                {"task": f"Running {tool_info['name']}...", "tool_key": detected_tool, "tool_name": tool_info['name']}
             )
         return None
 
@@ -314,7 +329,9 @@ After all complete, provide a brief risk summary."""
 
         parsed = parse_tool_result(result_content)
         if not parsed:
+            logger.warning("Could not parse tool result from: %s", result_content[:200])
             return None
+        logger.info("Parsed tool result: status=%s, findings=%d", parsed.get('status'), len(parsed.get('findings', [])))
 
         status = parsed.get("status", "unknown")
         findings = parsed.get("findings", [])
@@ -333,6 +350,8 @@ After all complete, provide a brief risk summary."""
                 "resultType": "warning" if is_warning else "success",
                 "findings": findings,
                 "confidence": parsed.get("confidence", 80),
+                "tool_key": tool_key,
+                "tool_name": tool_info["name"],
             }
         )
 

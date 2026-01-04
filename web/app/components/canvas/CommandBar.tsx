@@ -51,9 +51,9 @@ export function CommandBar() {
     <Panel position="bottom-center" className="mb-6">
       <div className="flex flex-col items-center">
         {isFocused && !isProcessing && (
-          <div className="absolute bottom-full mb-2 w-[500px] bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <div className="px-3 py-2 border-b border-slate-100">
-              <span className="text-xs text-slate-400 font-medium">Suggestions</span>
+          <div className="absolute bottom-full mb-2 w-[500px] bg-black/30 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="px-3 py-2 border-b border-white/10">
+              <span className="text-xs text-white/40 font-medium">Suggestions</span>
             </div>
             <div className="py-1">
               {SUGGESTIONS.map((suggestion, idx) => (
@@ -63,9 +63,9 @@ export function CommandBar() {
                     e.preventDefault();
                     setInput(suggestion);
                   }}
-                  className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center gap-2"
+                  className="w-full px-4 py-2.5 text-left text-sm text-white/70 hover:bg-black/40 hover:text-white transition-colors flex items-center gap-2"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-slate-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
                   {suggestion}
                 </button>
               ))}
@@ -80,18 +80,18 @@ export function CommandBar() {
         )}
 
         {sseError && (
-          <div className="mb-3 px-4 py-2 bg-red-50 border border-red-200 rounded-xl">
-            <span className="text-red-600 text-xs">{sseError}</span>
+          <div className="mb-3 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
+            <span className="text-red-400 text-xs">{sseError}</span>
           </div>
         )}
 
         <div
-          className={`relative bg-white/95 backdrop-blur-sm border rounded-xl shadow-lg transition-all duration-200 w-[500px] z-10 ${
-            isFocused ? 'border-cyan-400 shadow-cyan-500/10' : 'border-slate-200'
+          className={`relative bg-black/30 backdrop-blur-md border rounded-xl shadow-2xl transition-all duration-200 w-[500px] z-10 grain ${
+            isFocused ? 'border-cyan-400/50 shadow-cyan-500/20' : 'border-white/10'
           }`}
         >
           <div className="flex items-center gap-2 p-2.5">
-            <Sparkles className={`w-4 h-4 ml-1 transition-colors ${isFocused ? 'text-cyan-500' : 'text-slate-400'}`} />
+            <Sparkles className={`w-4 h-4 ml-1 transition-colors ${isFocused ? 'text-cyan-400' : 'text-white/40'}`} />
 
             <input
               ref={inputRef}
@@ -103,18 +103,18 @@ export function CommandBar() {
               onBlur={() => setIsFocused(false)}
               placeholder="Enter entity name to investigate..."
               disabled={isProcessing}
-              className="flex-1 bg-transparent border-none outline-none text-slate-900 placeholder-slate-400 py-1 text-sm disabled:opacity-50"
+              className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/30 py-1 text-sm disabled:opacity-50"
             />
 
             <div className="flex items-center gap-1.5">
-              <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] text-slate-500">
+              <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 bg-black/30 border border-white/10 rounded text-[10px] text-white/40">
                 <Command className="w-2.5 h-2.5" />K
               </kbd>
 
               <button
                 onClick={autoOrganize}
                 title="Auto-organize"
-                className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-all"
+                className="p-2 rounded-lg bg-black/20 hover:bg-black/30 text-white/50 hover:text-white transition-all"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
               </button>
@@ -124,8 +124,8 @@ export function CommandBar() {
                 disabled={!input.trim() || isProcessing}
                 className={`p-2 rounded-lg flex items-center transition-all ${
                   input.trim() && !isProcessing
-                    ? 'bg-cyan-500 hover:bg-cyan-600 text-white'
-                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/20'
+                    : 'bg-black/20 text-white/30 cursor-not-allowed'
                 }`}
               >
                 <Send className="w-3.5 h-3.5" />

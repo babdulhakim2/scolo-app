@@ -5,9 +5,15 @@ import { useCanvasStore } from '@/app/store/canvas-store';
 import { createProjectInDb } from '@/lib/services/canvas-sync';
 import type { SSEMessage, ToolKey, StartProjectResponse } from '@/app/types/canvas';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8005';
 
-const DEFAULT_TOOLS: ToolKey[] = ['sanctions', 'pep_check', 'adverse_media', 'geo_risk'];
+const DEFAULT_TOOLS: ToolKey[] = [
+  'sanctions', 'pep_check', 'adverse_media', 'geo_risk',
+  'business_registry', 'ubo_lookup', 'court_records', 'property_records',
+  'corporate_filings', 'employment_verify', 'education_verify',
+  'phone_lookup', 'email_lookup', 'social_media', 'domain_whois',
+  'ip_geolocation', 'crypto_trace'
+];
 
 export function useProject() {
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -95,11 +101,14 @@ export function useProject() {
         };
 
         eventSource.onmessage = (event) => {
+          console.log('[SSE] Raw data received:', event.data);
           try {
             const message: SSEMessage = JSON.parse(event.data);
+            console.log('[SSE] Parsed message:', message);
             handleSSEMessage(message);
 
             if (message.type === 'project_complete') {
+              console.log('[SSE] Project complete, closing connection');
               eventSource.close();
               eventSourceRef.current = null;
               setSSEConnected(false);

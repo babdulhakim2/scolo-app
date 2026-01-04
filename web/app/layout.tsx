@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({
@@ -7,9 +7,15 @@ const inter = Inter({
   subsets: ['latin'],
 });
 
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-space-grotesk',
+  subsets: ['latin'],
+  weight: ['500', '700'],
+});
+
 export const metadata: Metadata = {
-  title: 'Scolo - Discovery Platform',
-  description: 'AI-powered compliance and discovery platform',
+  title: 'Scolo — Intelligence Canvas for Due Diligence',
+  description: 'See the connections others miss. Scolo gives you an infinite canvas to search public records, run background checks, and visualize relationships.',
   icons: {
     icon: '/favicon.ico',
   },
@@ -22,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}>{children}</body>
     </html>
   );
 }

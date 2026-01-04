@@ -10,7 +10,24 @@ export type NodeStatus =
   | 'failed'
   | 'flagged';
 
-export type ToolKey = 'sanctions' | 'pep_check' | 'adverse_media' | 'business_registry' | 'geo_risk';
+export type ToolKey =
+  | 'sanctions'
+  | 'pep_check'
+  | 'adverse_media'
+  | 'geo_risk'
+  | 'business_registry'
+  | 'ubo_lookup'
+  | 'court_records'
+  | 'property_records'
+  | 'corporate_filings'
+  | 'employment_verify'
+  | 'education_verify'
+  | 'phone_lookup'
+  | 'email_lookup'
+  | 'social_media'
+  | 'domain_whois'
+  | 'ip_geolocation'
+  | 'crypto_trace';
 
 
 export interface ToolInfo {

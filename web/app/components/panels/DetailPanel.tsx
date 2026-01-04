@@ -35,22 +35,22 @@ export function DetailPanel() {
   return (
     <div
       ref={panelRef}
-      className="fixed top-0 right-0 h-full w-[400px] bg-white border-l border-slate-200 shadow-2xl z-40 flex flex-col"
+      className="fixed top-0 right-0 h-full w-[400px] bg-black/20 backdrop-blur-md border-l border-white/10 shadow-2xl z-40 flex flex-col"
     >
-      <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 bg-slate-50/50">
+      <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-black/20">
         <div>
-          <div className="font-semibold text-slate-900">
+          <div className="font-semibold text-white">
             {selectedNodes.length === 1 ? 'Node Details' : `${selectedNodes.length} Nodes`}
           </div>
           {selectedNodes.length === 1 && (
-            <div className="text-sm text-slate-500 mt-0.5">{selectedNodes[0].data.label as string}</div>
+            <div className="text-sm text-white/60 mt-0.5">{selectedNodes[0].data.label as string}</div>
           )}
         </div>
         <button
           onClick={handleClose}
-          className="p-2 hover:bg-slate-100 rounded-xl transition-all group"
+          className="p-2 hover:bg-black/40 rounded-xl transition-all group"
         >
-          <X className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />
+          <X className="w-5 h-5 text-white/40 group-hover:text-white/60" />
         </button>
       </div>
 
@@ -58,8 +58,8 @@ export function DetailPanel() {
         {selectedNodes.length === 1 ? (
           <NodeDetails node={selectedNodes[0]} />
         ) : (
-          <div className="p-6 bg-slate-50 rounded-2xl text-center">
-            <div className="text-sm text-slate-500">
+          <div className="p-6 bg-black/20 rounded-2xl text-center">
+            <div className="text-sm text-white/50">
               Select a single node to view details.
             </div>
           </div>
@@ -94,24 +94,24 @@ function EntityDetails({ data }: { data: Record<string, unknown> }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl border border-cyan-100">
+      <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-black/30 to-black/40 rounded-2xl border border-white/20">
         <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
           <Shield className="w-7 h-7 text-white" />
         </div>
         <div className="flex-1">
-          <div className="text-lg font-semibold text-slate-900">{data.label as string}</div>
+          <div className="text-lg font-semibold text-white">{data.label as string}</div>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-sm text-slate-500 capitalize">{data.entityType as string}</span>
+            <span className="text-sm text-white/60 capitalize">{data.entityType as string}</span>
             {status && <StatusBadge status={status} size="sm" />}
           </div>
         </div>
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-900">Risk Assessment</h3>
-        <div className="p-4 bg-slate-50 rounded-xl space-y-3">
+        <h3 className="text-sm font-semibold text-white">Risk Assessment</h3>
+        <div className="p-4 bg-black/30 rounded-xl space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-600">Overall Score</span>
+            <span className="text-sm text-white/70">Overall Score</span>
             <span
               className={`text-2xl font-bold ${
                 riskScore >= 70 ? 'text-red-500' : riskScore >= 40 ? 'text-amber-500' : 'text-emerald-500'
@@ -120,7 +120,7 @@ function EntityDetails({ data }: { data: Record<string, unknown> }) {
               {riskScore}/100
             </span>
           </div>
-          <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-black/50 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${
                 riskScore >= 70
@@ -134,7 +134,7 @@ function EntityDetails({ data }: { data: Record<string, unknown> }) {
           </div>
           {riskLevel && (
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-500">Risk Level</span>
+              <span className="text-sm text-white/60">Risk Level</span>
               <StatusBadge status={riskLevel} size="sm" />
             </div>
           )}
@@ -142,8 +142,8 @@ function EntityDetails({ data }: { data: Record<string, unknown> }) {
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-900">Details</h3>
-        <div className="divide-y divide-slate-100 bg-slate-50 rounded-xl overflow-hidden">
+        <h3 className="text-sm font-semibold text-white">Details</h3>
+        <div className="divide-y divide-white/10 bg-black/30 rounded-xl overflow-hidden">
           <DetailRow label="Status" value={status} />
           <DetailRow label="Country" value={data.country as string} />
           <DetailRow label="Reg. Number" value={data.registrationNumber as string | undefined} />
@@ -163,24 +163,24 @@ function AgentDetails({ data }: { data: Record<string, unknown> }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl border border-cyan-100">
+      <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-black/30 to-black/40 rounded-2xl border border-white/20">
         <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
           <Bot className="w-7 h-7 text-white" />
         </div>
         <div className="flex-1">
-          <div className="text-lg font-semibold text-slate-900">{data.label as string}</div>
+          <div className="text-lg font-semibold text-white">{data.label as string}</div>
           <div className="flex items-center gap-2 mt-1">
             <StatusBadge status={status} size="sm" />
             {confidence && (
-              <span className="text-xs text-slate-500">{confidence}% confidence</span>
+              <span className="text-xs text-white/60">{confidence}% confidence</span>
             )}
           </div>
         </div>
       </div>
 
       {typeof data.task === 'string' && data.task && (
-        <div className="p-4 bg-slate-50 rounded-xl">
-          <div className="text-sm text-slate-600">{data.task}</div>
+        <div className="p-4 bg-black/30 rounded-xl">
+          <div className="text-sm text-white/70">{data.task}</div>
         </div>
       )}
 
@@ -197,8 +197,8 @@ function AgentDetails({ data }: { data: Record<string, unknown> }) {
       {findings && findings.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-900">Findings</h3>
-            <span className="text-xs text-slate-500">{findings.length} result{findings.length !== 1 ? 's' : ''}</span>
+            <h3 className="text-sm font-semibold text-white">Findings</h3>
+            <span className="text-xs text-white/60">{findings.length} result{findings.length !== 1 ? 's' : ''}</span>
           </div>
           <FindingsList findings={findings} maxItems={10} />
         </div>
@@ -224,44 +224,44 @@ function SummaryDetails({ data }: { data: Record<string, unknown> }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border border-slate-200">
+      <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-black/30 to-black/40 rounded-2xl border border-white/20">
         <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
           <ClipboardList className="w-7 h-7 text-white" />
         </div>
         <div className="flex-1">
-          <div className="text-lg font-semibold text-slate-900">{data.label as string || 'Analysis Summary'}</div>
+          <div className="text-lg font-semibold text-white">{data.label as string || 'Analysis Summary'}</div>
           <div className="flex items-center gap-2 mt-1">
             {riskLevel && <StatusBadge status={riskLevel} size="sm" />}
-            <span className="text-xs text-slate-500">{totalFindings} findings</span>
+            <span className="text-xs text-white/60">{totalFindings} findings</span>
           </div>
         </div>
       </div>
 
-      <div className="p-4 bg-slate-50 rounded-xl">
+      <div className="p-4 bg-black/30 rounded-xl">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-slate-500">Tools Completed</span>
-          <span className="text-sm font-medium text-slate-700">{toolsCompleted}</span>
+          <span className="text-sm text-white/60">Tools Completed</span>
+          <span className="text-sm font-medium text-white/80">{toolsCompleted}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-slate-500">Total Findings</span>
-          <span className="text-sm font-medium text-slate-700">{totalFindings}</span>
+          <span className="text-sm text-white/60">Total Findings</span>
+          <span className="text-sm font-medium text-white/80">{totalFindings}</span>
         </div>
       </div>
 
       {summary && (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-slate-900">Full Report</h3>
-          <div className="prose prose-sm prose-slate max-w-none bg-white border border-slate-200 rounded-xl p-4 max-h-[400px] overflow-y-auto">
+          <h3 className="text-sm font-semibold text-white">Full Report</h3>
+          <div className="prose prose-sm prose-slate max-w-none bg-black/40 border border-white/20 rounded-xl p-4 max-h-[400px] overflow-y-auto">
             <ReactMarkdown
               components={{
-                h1: ({ children }) => <h1 className="text-base font-bold text-slate-900 mt-4 mb-2">{children}</h1>,
-                h2: ({ children }) => <h2 className="text-sm font-bold text-slate-900 mt-4 mb-2">{children}</h2>,
-                h3: ({ children }) => <h3 className="text-sm font-semibold text-slate-800 mt-3 mb-1">{children}</h3>,
-                p: ({ children }) => <p className="text-sm text-slate-600 my-2 leading-relaxed">{children}</p>,
-                ul: ({ children }) => <ul className="text-sm text-slate-600 my-2 ml-4 space-y-1 list-disc">{children}</ul>,
-                li: ({ children }) => <li className="text-sm text-slate-600">{children}</li>,
-                strong: ({ children }) => <strong className="font-semibold text-slate-800">{children}</strong>,
-                em: ({ children }) => <em className="text-slate-500">{children}</em>,
+                h1: ({ children }) => <h1 className="text-base font-bold text-white mt-4 mb-2">{children}</h1>,
+                h2: ({ children }) => <h2 className="text-sm font-bold text-white mt-4 mb-2">{children}</h2>,
+                h3: ({ children }) => <h3 className="text-sm font-semibold text-white/90 mt-3 mb-1">{children}</h3>,
+                p: ({ children }) => <p className="text-sm text-white/70 my-2 leading-relaxed">{children}</p>,
+                ul: ({ children }) => <ul className="text-sm text-white/70 my-2 ml-4 space-y-1 list-disc">{children}</ul>,
+                li: ({ children }) => <li className="text-sm text-white/70">{children}</li>,
+                strong: ({ children }) => <strong className="font-semibold text-white/90">{children}</strong>,
+                em: ({ children }) => <em className="text-white/60">{children}</em>,
               }}
             >
               {summary}
@@ -276,8 +276,8 @@ function SummaryDetails({ data }: { data: Record<string, unknown> }) {
 function GenericDetails({ data }: { data: Record<string, unknown> }) {
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-slate-900">Properties</h3>
-      <div className="divide-y divide-slate-100 bg-slate-50 rounded-xl overflow-hidden">
+      <h3 className="text-sm font-semibold text-white">Properties</h3>
+      <div className="divide-y divide-white/10 bg-black/30 rounded-xl overflow-hidden">
         {Object.entries(data)
           .filter(([key]) => key !== 'onDelete')
           .map(([key, value]) => (
@@ -292,8 +292,8 @@ function DetailRow({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
   return (
     <div className="flex items-center justify-between px-4 py-3">
-      <span className="text-sm text-slate-500 capitalize">{label}</span>
-      <span className="text-sm font-medium text-slate-900">{value}</span>
+      <span className="text-sm text-white/60 capitalize">{label}</span>
+      <span className="text-sm font-medium text-white">{value}</span>
     </div>
   );
 }
