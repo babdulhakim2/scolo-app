@@ -13,7 +13,13 @@ app = FastAPI(title="Scolo API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://scolo-bot-*.run.app",  # Cloud Run URLs
+        "https://scolo.app",  # Production domain (if you have one)
+        "https://www.scolo.app",  # Production www domain
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
