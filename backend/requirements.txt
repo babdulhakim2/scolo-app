@@ -32,7 +32,6 @@ gql==4.0.0
 graphql-core==3.2.7
 graphviz==0.21
 grpclib==0.4.9
-gunicorn==23.0.0
 h11==0.16.0
 h2==4.3.0
 hpack==4.1.0
@@ -88,8 +87,7 @@ requests==2.32.5
 rich==14.2.0
 rpds-py==0.30.0
 ruff==0.14.10
-# Editable Git install with no remote (scolo-backend==0.1.0)
--e /Users/superfunguy/wsp/scolo/backend
+-e git+ssh://git@github.com/babdulhakim2/scolo-app.git@73fcb10d7866f9478e77d5031f4d1671e295d2e3#egg=scolo_backend&subdirectory=backend
 sentry-sdk==2.48.0
 setuptools==80.9.0
 shellingham==1.5.4
