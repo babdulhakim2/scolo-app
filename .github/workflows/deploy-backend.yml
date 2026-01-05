@@ -68,8 +68,10 @@ jobs:
         id: build
         run: |
           echo "Starting Cloud Build..."
+          # Try with explicit project and async to avoid bucket issues
           gcloud builds submit \
             --config=cloudbuild.yaml \
+            --project=${{ env.PROJECT_ID }} \
             --substitutions=_PROJECT_ID=${{ env.PROJECT_ID }},_REGION=${{ env.REGION }}
 
       - name: Get Service URL
