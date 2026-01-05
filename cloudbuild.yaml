@@ -5,7 +5,7 @@ steps:
     args:
       - "-c"
       - |
-        gcloud secrets versions access latest --secret=scolo-production-secrets > .env
+        gcloud secrets versions access latest --secret=scolo-app-osint-production-secrets > .env
         echo "✅ Environment variables loaded"
 
     secretEnv: ["SECRET"]
@@ -46,10 +46,11 @@ steps:
       - "--max-instances=10"
       - "--timeout=300"
       - "--allow-unauthenticated"
+      - "--set-secrets=/app/.env=scolo-app-osint-production-secrets:latest"
   
 availableSecrets:
   secretManager:
-    - versionName: projects/${_PROJECT_ID}/secrets/scolo-production-secrets/versions/latest
+    - versionName: projects/${_PROJECT_ID}/secrets/scolo-app-osint-production-secrets/versions/latest
       env: "SECRET"
 
 substitutions:

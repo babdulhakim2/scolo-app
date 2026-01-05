@@ -22,7 +22,7 @@ export default function LandingPage() {
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      router.push('/projects');
+      router.push('/projects/new');
     } else {
       router.push('/login');
     }
@@ -44,15 +44,12 @@ export default function LandingPage() {
               <Link href="#how" className="text-white/60 hover:text-white transition-colors">
                 How It Works
               </Link>
-              <Link href="#" className="text-white/60 hover:text-white transition-colors">
-                Pricing
-              </Link>
             </div>
             <button
               onClick={handleGetStarted}
               className="px-5 py-2.5 bg-black/30 hover:bg-black/40 border border-white/15 hover:border-white/25 rounded-xl text-white font-medium transition-all"
             >
-              {isAuthenticated ? 'Open Canvas' : 'Get Started'}
+              {isAuthenticated ? 'Dashboard' : 'Get Started'}
             </button>
           </div>
         </div>
@@ -82,7 +79,7 @@ export default function LandingPage() {
               onClick={handleGetStarted}
               className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold rounded-xl flex items-center gap-2 transition-all transform hover:scale-105 shadow-lg shadow-cyan-500/20"
             >
-              Start Free
+              {isAuthenticated ? 'Go to Dashboard' : 'Start Free'}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
             <button className="px-8 py-4 bg-black/20 hover:bg-black/30 border border-white/15 hover:border-white/25 text-white font-medium rounded-xl flex items-center gap-2 transition-all">
@@ -242,7 +239,7 @@ export default function LandingPage() {
             onClick={handleGetStarted}
             className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold rounded-xl inline-flex items-center gap-2 transition-all transform hover:scale-105 shadow-lg shadow-cyan-500/20"
           >
-            Get Started Free
+            {isAuthenticated ? 'Go to Dashboard' : 'Get Started Free'}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
@@ -255,9 +252,6 @@ export default function LandingPage() {
           <div className="flex gap-6">
             <Link href="#features" className="text-white/40 hover:text-white/60 transition-colors text-sm">
               Features
-            </Link>
-            <Link href="#" className="text-white/40 hover:text-white/60 transition-colors text-sm">
-              Pricing
             </Link>
             <Link href="#" className="text-white/40 hover:text-white/60 transition-colors text-sm">
               Docs

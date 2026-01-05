@@ -76,7 +76,7 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
         <div className="w-full max-w-md">
           {/* Back to Home */}
-          <Link href="/landing" className="inline-flex items-center gap-2 text-white/60 hover:text-white mb-8 transition-colors">
+          <Link href="/" className="inline-flex items-center gap-2 text-white/60 hover:text-white mb-8 transition-colors">
             <ChevronLeft className="w-4 h-4" />
             Back to Home
           </Link>
