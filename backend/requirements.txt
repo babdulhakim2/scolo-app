@@ -87,7 +87,6 @@ requests==2.32.5
 rich==14.2.0
 rpds-py==0.30.0
 ruff==0.14.10
--e git+ssh://git@github.com/babdulhakim2/scolo-app.git@73fcb10d7866f9478e77d5031f4d1671e295d2e3#egg=scolo_backend&subdirectory=backend
 sentry-sdk==2.48.0
 setuptools==80.9.0
 shellingham==1.5.4
