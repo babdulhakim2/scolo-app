@@ -38,17 +38,16 @@ export function SpaceBackground() {
             width: 2px;
             height: 2px;
             background: white;
-            border-radius: 50%;
             opacity: 0.4;
             animation: twinkle 4s infinite;
           }
         `}</style>
       </div>
 
-      {/* Floating Orbs */}
+      {/* Floating Square Orbs */}
       <div className="absolute inset-0 overflow-hidden">
         <div
-          className="orb absolute w-[500px] h-[500px] rounded-full animate-float"
+          className="orb absolute w-[500px] h-[500px] animate-float"
           style={{
             background: 'rgba(6, 182, 212, 0.25)',
             top: '5%',
@@ -57,7 +56,7 @@ export function SpaceBackground() {
           }}
         />
         <div
-          className="orb absolute w-[400px] h-[400px] rounded-full animate-float"
+          className="orb absolute w-[400px] h-[400px] animate-float"
           style={{
             background: 'rgba(139, 92, 246, 0.3)',
             bottom: '10%',
@@ -67,7 +66,7 @@ export function SpaceBackground() {
           }}
         />
         <div
-          className="orb absolute w-[300px] h-[300px] rounded-full animate-float"
+          className="orb absolute w-[300px] h-[300px] animate-float"
           style={{
             background: 'rgba(59, 130, 246, 0.25)',
             top: '40%',
