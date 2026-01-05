@@ -36,7 +36,7 @@ steps:
     args:
       - "run"
       - "deploy"
-      - "scolo-bot"
+      - "scolo-app-osint"
       - "--image=us-central1-docker.pkg.dev/${_PROJECT_ID}/scolo-repo/scolo-bot:$BUILD_ID"
       - "--platform=managed"
       - "--region=${_REGION}"

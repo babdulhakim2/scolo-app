@@ -23,7 +23,7 @@ on:
 env:
   PROJECT_ID: scolo-ai
   REGION: us-central1
-  SERVICE_NAME: scolo-bot
+  SERVICE_NAME: scolo-app-osint
   REPOSITORY: scolo-repo
 
 jobs:
