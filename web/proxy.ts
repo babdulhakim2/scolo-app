@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-export async function updateSession(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -29,16 +29,30 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLoginPage = request.nextUrl.pathname === '/login';
-  const isAuthCallback = request.nextUrl.pathname === '/auth/callback';
-  const isApiRoute = request.nextUrl.pathname.startsWith('/api');
+  const pathname = request.nextUrl.pathname;
+  const isLoginPage = pathname === '/login';
+  const isAuthCallback = pathname === '/auth/callback';
+  const isApiRoute = pathname.startsWith('/api');
+  const isRootPage = pathname === '/';
 
-  if (!user && !isLoginPage && !isAuthCallback && !isApiRoute) {
+  // Skip middleware for API routes and auth callback
+  if (isApiRoute || isAuthCallback) {
+    return supabaseResponse;
+  }
+
+  // Allow access to root page without authentication
+  if (isRootPage) {
+    return supabaseResponse;
+  }
+
+  // Redirect unauthenticated users to login
+  if (!user && !isLoginPage) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
+  // Redirect authenticated users away from login
   if (user && isLoginPage) {
     const url = request.nextUrl.clone();
     url.pathname = '/projects';
@@ -47,3 +61,9 @@ export async function updateSession(request: NextRequest) {
 
   return supabaseResponse;
 }
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+};
