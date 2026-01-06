@@ -39,8 +39,8 @@ export function ConfirmDialog({
   onConfirm,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel = 'CONFIRM',
+  cancelLabel = 'CANCEL',
   isLoading = false,
   variant = 'danger',
 }: ConfirmDialogProps) {
@@ -54,34 +54,34 @@ export function ConfirmDialog({
         className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
         onClick={() => !isLoading && onClose()}
       />
-      <div className="relative bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl w-full max-w-sm mx-4 animate-in zoom-in-95 fade-in duration-200 grain">
+      <div className="relative bg-black/20 backdrop-blur-md border-2 border-white/10 shadow-2xl w-full max-w-sm mx-4 animate-in zoom-in-95 fade-in duration-200 grain">
         <div className="p-6">
-          <div className={`w-12 h-12 ${styles.icon} rounded-xl flex items-center justify-center mx-auto mb-4`}>
+          <div className={`w-12 h-12 ${styles.icon} flex items-center justify-center mx-auto mb-4 border border-white/20`}>
             <AlertTriangle className={`w-6 h-6 ${styles.iconColor}`} />
           </div>
-          <h3 className="text-lg font-semibold text-white text-center mb-2">
+          <h3 className="text-lg font-semibold text-white text-center mb-2 uppercase tracking-wider">
             {title}
           </h3>
-          <div className="text-sm text-white/70 text-center mb-6">
+          <div className="text-sm text-white/70 text-center mb-6 uppercase tracking-wider">
             {description}
           </div>
           <div className="flex gap-3">
             <button
               onClick={onClose}
               disabled={isLoading}
-              className="flex-1 px-4 py-2.5 text-sm font-medium text-white/70 bg-black/40 hover:bg-black/50 rounded-xl transition-all disabled:opacity-50 border border-white/10"
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-white/70 bg-black/40 hover:bg-black/50 transition-all disabled:opacity-50 border-2 border-white/10 uppercase tracking-wider"
             >
               {cancelLabel}
             </button>
             <button
               onClick={onConfirm}
               disabled={isLoading}
-              className={`flex-1 px-4 py-2.5 text-sm font-medium text-white ${styles.button} rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2`}
+              className={`flex-1 px-4 py-2.5 text-sm font-medium text-white ${styles.button} transition-colors disabled:opacity-50 flex items-center justify-center gap-2 border-2 border-white/20 uppercase tracking-wider`}
             >
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Loading...
+                  LOADING...
                 </>
               ) : (
                 confirmLabel

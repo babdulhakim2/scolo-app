@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
-  Shield,
   FolderOpen,
   Plus,
   Settings,
@@ -201,12 +201,15 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
           <div className="flex items-center gap-2 mb-4 relative">
             {sidebarCollapsed ? (
               <>
-                <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto shadow-lg shadow-cyan-500/20 transition-opacity group-hover/sidebar:opacity-0">
-                  <Shield className="w-4 h-4 text-white" />
-                </div>
+                <Link
+                  href="/"
+                  className="text-lg font-bold gradient-text uppercase tracking-wider mx-auto transition-opacity group-hover/sidebar:opacity-0 font-[family-name:var(--font-space-grotesk)]"
+                >
+                  S
+                </Link>
                 <button
                   onClick={toggleSidebar}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-xl hover:bg-black/40 transition-all opacity-0 group-hover/sidebar:opacity-100"
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center hover:bg-black/40 transition-all opacity-0 group-hover/sidebar:opacity-100 border border-white/10"
                   title="Expand sidebar"
                 >
                   <PanelLeftClose className="w-4 h-4 text-white/60" />
@@ -214,16 +217,16 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
               </>
             ) : (
               <>
-                <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/20">
-                  <Shield className="w-4 h-4 text-white" />
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <h1 className="text-sm font-semibold text-white font-[family-name:var(--font-space-grotesk)]">Scolo</h1>
-                  <p className="text-xs text-white/60">Discovery Platform</p>
-                </div>
+                <Link
+                  href="/"
+                  className="flex-1 overflow-hidden hover:opacity-80 transition-opacity"
+                >
+                  <h1 className="text-sm font-semibold gradient-text font-[family-name:var(--font-space-grotesk)] uppercase tracking-wider">Scolo</h1>
+                  <p className="text-xs text-white/60 uppercase tracking-widest">Discovery Platform</p>
+                </Link>
                 <button
                   onClick={toggleSidebar}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-black/40 transition-all opacity-0 group-hover/sidebar:opacity-100 flex-shrink-0"
+                  className="w-7 h-7 flex items-center justify-center hover:bg-black/40 transition-all opacity-0 group-hover/sidebar:opacity-100 flex-shrink-0 border border-transparent hover:border-white/10"
                   title="Collapse sidebar"
                 >
                   <PanelLeft className="w-4 h-4 text-white/60" />
@@ -235,7 +238,7 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
           {!sidebarCollapsed && (
             <button
               onClick={() => setIsCreating(true)}
-              className="group w-full px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white text-sm rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30 hover:scale-[1.02] active:scale-[0.98] font-medium"
+              className="group w-full px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30 hover:scale-[1.02] active:scale-[0.98] font-semibold border border-cyan-400/30"
             >
               <Plus className="w-4 h-4" />
               <span>New Project</span>
@@ -247,7 +250,7 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
                 toggleSidebar();
                 setTimeout(() => setIsCreating(true), 300);
               }}
-              className="group w-full p-2.5 bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white rounded-xl flex items-center justify-center transition-all shadow-lg shadow-cyan-500/20 hover:scale-105 active:scale-95"
+              className="group w-full p-2.5 bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white flex items-center justify-center transition-all shadow-lg shadow-cyan-500/20 hover:scale-105 active:scale-95 border border-cyan-400/30"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -261,7 +264,7 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
             )}
             <div className="space-y-1">
               {isCreating && !sidebarCollapsed && (
-                <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-xl">
+                <div className="p-2 bg-cyan-500/10 border border-cyan-500/30">
                   <input
                     ref={inputRef}
                     type="text"
@@ -276,13 +279,13 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
                     }}
                     onBlur={handleCreateProject}
                     placeholder="Project name..."
-                    className="w-full px-2 py-1.5 text-sm bg-black/20 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white placeholder-white/30"
+                    className="w-full px-2 py-1.5 text-sm bg-black/20 border border-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white placeholder-white/30"
                   />
                 </div>
               )}
 
               {projects.length === 0 && !isCreating ? (
-                <div className="text-center py-8 text-white/40 text-sm">
+                <div className="text-center py-8 text-white/40 text-sm uppercase tracking-wider">
                   {sidebarCollapsed ? '' : 'No projects yet'}
                 </div>
               ) : (
@@ -295,7 +298,7 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
                     <div
                       key={project.id}
                       onContextMenu={(e) => handleContextMenu(e, project.id)}
-                      className={`w-full rounded-xl transition-all group relative ${
+                      className={`w-full transition-all group relative ${
                         isActive
                           ? 'bg-cyan-500/10 border border-cyan-500/30 shadow-lg shadow-cyan-500/10'
                           : 'hover:bg-black/20 border border-transparent'
@@ -316,11 +319,11 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
                                   setEditName('');
                                 }
                               }}
-                              className="flex-1 px-2 py-1 text-sm bg-black/20 border border-cyan-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
+                              className="flex-1 px-2 py-1 text-sm bg-black/20 border border-cyan-500/30 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
                             />
                             <button
                               onClick={() => handleRename(project.id)}
-                              className="p-1 text-green-400 hover:bg-green-500/10 rounded"
+                              className="p-1 text-green-400 hover:bg-green-500/10"
                             >
                               <Check className="w-4 h-4" />
                             </button>
@@ -329,7 +332,7 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
                                 setEditingId(null);
                                 setEditName('');
                               }}
-                              className="p-1 text-white/40 hover:bg-black/30 rounded"
+                              className="p-1 text-white/40 hover:bg-black/30"
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -351,8 +354,8 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
                               ) : (
                                 <>
                                   <div
-                                    className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                      isActive ? 'bg-cyan-500 shadow-lg shadow-cyan-500/20' : 'bg-black/40'
+                                    className={`w-7 h-7 flex items-center justify-center flex-shrink-0 border ${
+                                      isActive ? 'bg-cyan-500 shadow-lg shadow-cyan-500/20 border-cyan-400/50' : 'bg-black/40 border-white/10'
                                     }`}
                                   >
                                     <FolderOpen
@@ -361,13 +364,13 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
                                   </div>
                                   <div className="flex-1 min-w-0 overflow-hidden">
                                     <div
-                                      className={`text-sm font-medium leading-snug truncate ${
+                                      className={`text-xs font-medium leading-snug truncate ${
                                         isActive ? 'text-white' : 'text-white/80'
                                       }`}
                                     >
                                       {project.name}
                                     </div>
-                                    <div className="text-xs text-white/40 truncate">
+                                    <div className="text-xs text-white/40 truncate uppercase">
                                       {isRunning ? 'Running...' : project.status}
                                     </div>
                                   </div>
@@ -381,7 +384,7 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
                                   setContextMenuPos({ x: e.clientX, y: e.clientY });
                                   setContextMenuId(project.id);
                                 }}
-                                className="flex-shrink-0 opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/50 transition-all"
+                                className="flex-shrink-0 opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center hover:bg-black/50 transition-all border border-transparent hover:border-white/10"
                               >
                                 <MoreVertical className="w-4 h-4 text-white/40" />
                               </button>
@@ -400,39 +403,39 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
         <div className="p-4 border-t border-white/10">
           <div className="space-y-1">
             <button
-              className="w-full p-2.5 hover:bg-black/30 rounded-xl flex items-center gap-2.5 transition-all group"
+              className="w-full p-2.5 hover:bg-black/30 flex items-center gap-2.5 transition-all group border border-transparent hover:border-white/10"
               title={sidebarCollapsed ? 'Notifications' : undefined}
             >
               <div className="relative">
                 <Bell className="w-4 h-4 text-white/40 group-hover:text-cyan-400 transition-colors" />
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500" />
               </div>
               {!sidebarCollapsed && (
-                <span className="text-sm text-white/60 group-hover:text-white">Notifications</span>
+                <span className="text-xs text-white/60 group-hover:text-white uppercase tracking-wider">Notifications</span>
               )}
             </button>
             <button
-              className="w-full p-2.5 hover:bg-black/30 rounded-xl flex items-center gap-2.5 transition-all group"
+              className="w-full p-2.5 hover:bg-black/30 flex items-center gap-2.5 transition-all group border border-transparent hover:border-white/10"
               title={sidebarCollapsed ? 'Settings' : undefined}
             >
               <Settings className="w-4 h-4 text-white/40 group-hover:text-cyan-400 transition-colors" />
-              {!sidebarCollapsed && <span className="text-sm text-white/60 group-hover:text-white">Settings</span>}
+              {!sidebarCollapsed && <span className="text-xs text-white/60 group-hover:text-white uppercase tracking-wider">Settings</span>}
             </button>
 
             <div className="pt-2 mt-2 border-t border-white/10">
-              <div className={`flex items-center gap-3 p-3 bg-black/30 rounded-xl ${sidebarCollapsed ? 'justify-center' : ''}`}>
-                <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 shadow-lg shadow-cyan-500/20">
+              <div className={`flex items-center gap-3 p-3 bg-black/30 border border-white/10 ${sidebarCollapsed ? 'justify-center' : ''}`}>
+                <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0 shadow-lg shadow-cyan-500/20 border border-cyan-400/30 uppercase">
                   {getUserInitials()}
                 </div>
                 {!sidebarCollapsed && (
                   <>
                     <div className="flex-1 overflow-hidden">
-                      <div className="text-sm font-medium text-white truncate">{user?.email || ''}</div>
-                      <div className="text-xs text-white/60">Analyst</div>
+                      <div className="text-xs font-medium text-white truncate">{user?.email || ''}</div>
+                      <div className="text-xs text-white/60 uppercase tracking-wider">Analyst</div>
                     </div>
                     <button
                       onClick={handleLogout}
-                      className="p-1.5 hover:bg-black/40 rounded-lg transition-colors"
+                      className="p-1.5 hover:bg-black/40 transition-colors border border-transparent hover:border-white/10"
                       title="Sign out"
                     >
                       <LogOut className="w-4 h-4 text-white/50" />
@@ -449,7 +452,7 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
         <div
           ref={contextMenuRef}
           style={{ top: contextMenuPos.y, left: contextMenuPos.x }}
-          className="fixed z-50 bg-black/90 backdrop-blur-md border border-white/20 rounded-xl shadow-lg py-1 min-w-[140px]"
+          className="fixed z-50 bg-black/90 backdrop-blur-md border border-white/20 shadow-lg py-1 min-w-[140px]"
         >
           <button
             onClick={() => {
@@ -460,7 +463,7 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
               }
               setContextMenuId(null);
             }}
-            className="w-full px-3 py-2 text-sm text-left text-white hover:bg-black/40 flex items-center gap-2"
+            className="w-full px-3 py-2 text-xs uppercase tracking-wider text-left text-white hover:bg-black/40 flex items-center gap-2"
           >
             <Pencil className="w-4 h-4" />
             Rename
@@ -470,7 +473,7 @@ export function LeftPanel({ initialUser, initialProjects }: LeftPanelProps) {
               setDeleteModalId(contextMenuId);
               setContextMenuId(null);
             }}
-            className="w-full px-3 py-2 text-sm text-left text-red-400 hover:bg-red-500/20 flex items-center gap-2"
+            className="w-full px-3 py-2 text-xs uppercase tracking-wider text-left text-red-400 hover:bg-red-500/20 flex items-center gap-2"
           >
             <Trash2 className="w-4 h-4" />
             Delete

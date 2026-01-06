@@ -38,16 +38,16 @@ export const SummaryNode = memo(({ id, data }: NodeProps) => {
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative bg-black/20 backdrop-blur-md border ${riskConfig.border} rounded-2xl shadow-lg transition-all duration-300 min-w-[320px] max-w-[400px] overflow-visible group hover:scale-105 hover:bg-black/30 grain`}
+      className={`relative bg-black/20 backdrop-blur-md border-2 ${riskConfig.border} shadow-lg transition-all duration-300 min-w-[320px] max-w-[400px] overflow-visible group hover:scale-105 hover:bg-black/30 grain`}
     >
-      <div className={`absolute top-0 left-0 right-0 h-1.5 rounded-t-2xl ${riskConfig.color}`} />
+      <div className={`absolute top-0 left-0 right-0 h-1.5 ${riskConfig.color}`} />
 
       <Handle type="target" position={Position.Top} className="!w-3 !h-3 !bg-gradient-to-r !from-cyan-400 !to-blue-500 !border-2 !border-white/30 !shadow-lg !shadow-cyan-500/30" />
 
       {isHovered && nodeData.onDelete && (
         <button
           onClick={() => nodeData.onDelete?.(id)}
-          className="absolute -top-3 -right-3 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100 z-50 hover:scale-110"
+          className="absolute -top-3 -right-3 w-7 h-7 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex items-center justify-center shadow-lg shadow-red-500/30 transition-all opacity-0 group-hover:opacity-100 z-50 hover:scale-110 border border-red-400/30"
         >
           <X className="w-3.5 h-3.5" />
         </button>
@@ -55,7 +55,7 @@ export const SummaryNode = memo(({ id, data }: NodeProps) => {
 
       <div className="px-5 py-4">
         <div className="flex items-center gap-3 mb-4">
-          <div className={`p-3 rounded-xl ${riskConfig.color}`}>
+          <div className={`p-3 ${riskConfig.color} border border-white/20`}>
             <FileText className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1">
@@ -64,10 +64,10 @@ export const SummaryNode = memo(({ id, data }: NodeProps) => {
               <div className="text-white font-semibold text-sm">{nodeData.label || 'Analysis Summary'}</div>
             </div>
             <div className="flex items-center gap-2 mt-1">
-              <span className={`px-2 py-0.5 ${riskConfig.color} text-white text-xs rounded-full font-medium shadow-sm`}>
+              <span className={`px-2.5 py-1 ${riskConfig.color} text-white text-xs font-medium shadow-sm uppercase tracking-wider border border-white/20`}>
                 {riskConfig.text}
               </span>
-              <span className="px-2 py-0.5 bg-black/40 text-white/70 text-xs rounded-full font-medium">
+              <span className="px-2 py-0.5 bg-black/40 text-white/70 text-xs font-medium uppercase tracking-wider border border-white/10">
                 {nodeData.totalFindings} findings
               </span>
             </div>
@@ -80,9 +80,9 @@ export const SummaryNode = memo(({ id, data }: NodeProps) => {
         <div className="prose prose-sm prose-slate max-w-none max-h-[300px] overflow-y-auto px-1">
           <ReactMarkdown
             components={{
-              h1: ({ children }) => <h1 className="text-base font-bold text-white mt-3 mb-2">{children}</h1>,
-              h2: ({ children }) => <h2 className="text-sm font-bold text-white mt-3 mb-1">{children}</h2>,
-              h3: ({ children }) => <h3 className="text-sm font-semibold text-white/90 mt-2 mb-1">{children}</h3>,
+              h1: ({ children }) => <h1 className="text-base font-bold text-white mt-3 mb-2 uppercase tracking-wider">{children}</h1>,
+              h2: ({ children }) => <h2 className="text-sm font-bold text-white mt-3 mb-1 uppercase tracking-wider">{children}</h2>,
+              h3: ({ children }) => <h3 className="text-sm font-semibold text-white/90 mt-2 mb-1 uppercase tracking-wider">{children}</h3>,
               p: ({ children }) => <p className="text-xs text-white/70 my-1 leading-relaxed">{children}</p>,
               ul: ({ children }) => <ul className="text-xs text-white/70 my-1 ml-3 space-y-0.5">{children}</ul>,
               li: ({ children }) => <li className="text-xs text-white/70">{children}</li>,
@@ -102,7 +102,7 @@ export const SummaryNode = memo(({ id, data }: NodeProps) => {
         <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
           <div className="flex items-center gap-1">
             <Shield className="w-3 h-3 text-white/60" />
-            <span>{nodeData.toolsCompleted} tools completed</span>
+            <span className="uppercase tracking-wider">{nodeData.toolsCompleted} tools completed</span>
           </div>
         </div>
       </div>

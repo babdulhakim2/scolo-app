@@ -177,7 +177,7 @@ function Canvas({ projectId, initialProjects, initialUser, initialNodes, initial
         >
           <Background variant={BackgroundVariant.Dots} color="#06b6d4" gap={20} size={1} className="opacity-20" />
           <Controls
-            className="!bg-black/20 !backdrop-blur-md !border-white/10 !shadow-xl !rounded-xl"
+            className="!bg-black/30 !backdrop-blur-md !border !border-white/10 !shadow-xl grain"
             showInteractive={false}
           />
           <CanvasControls hasProjects={initialProjects && initialProjects.length > 0} />

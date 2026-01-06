@@ -90,7 +90,7 @@ export default function LoginPage() {
             <h1 className="text-3xl font-bold font-[family-name:var(--font-space-grotesk)] gradient-text mb-2 uppercase tracking-wider">
               Welcome to Scolo
             </h1>
-            <p className="text-white/60 uppercase text-xs tracking-widest">Intelligence Canvas for Due Diligence</p>
+            <p className="text-white/60 uppercase text-xs tracking-widest">Intelligence Agents for Due Diligence</p>
           </div>
 
           {/* Login Form */}

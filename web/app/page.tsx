@@ -1,23 +1,21 @@
 'use client';
 
-import Link from 'next/link';
-import { useEffect, useState, useRef } from 'react';
-import { ArrowRight, Play, Shield, Search, Share2, FileText } from 'lucide-react';
 import { GlassCard } from '@/app/components/ui/GlassCard';
-import { SquareButton } from '@/app/components/ui/SquareButton';
-import { SpaceBackground } from '@/app/components/ui/SpaceBackground';
 import { NoiseOverlay } from '@/app/components/ui/NoiseOverlay';
-import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { SpaceBackground } from '@/app/components/ui/SpaceBackground';
+import { SquareButton } from '@/app/components/ui/SquareButton';
 import {
-  useMagneticButton,
-  useTextReveal,
-  useStaggerFadeIn,
   useGlitchHover,
   useParallax,
-  useTypewriter
+  useStaggerFadeIn,
+  useTextReveal
 } from '@/app/hooks/useGSAPAnimations';
+import { createClient } from '@/lib/supabase/client';
 import gsap from 'gsap';
+import { ArrowRight, FileText, Play, Search, Share2, Shield } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 export default function LandingPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -28,9 +26,9 @@ export default function LandingPage() {
   const heroTitleRef = useTextReveal(0.3);
   const heroSubtitleRef = useRef<HTMLParagraphElement>(null);
   const featuresRef = useStaggerFadeIn(0.1);
-  const magneticBtnRef = useMagneticButton(0.3);
-  const glitchLogoRef = useGlitchHover();
+  const glitchLogoRef = useGlitchHover<HTMLAnchorElement>();
   const parallaxRef = useParallax(0.3);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -38,6 +36,34 @@ export default function LandingPage() {
         setIsAuthenticated(true);
       }
     });
+
+    // Animate subtitle after title
+    if (heroSubtitleRef.current) {
+      gsap.fromTo(
+        heroSubtitleRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 1, delay: 1.2, ease: 'power3.out' }
+      );
+    }
+
+    // Animate video on scroll
+    if (videoRef.current) {
+      gsap.fromTo(
+        videoRef.current,
+        { scale: 0.9, opacity: 0 },
+        {
+          scale: 1,
+          opacity: 0.9,
+          duration: 1.5,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: videoRef.current,
+            start: 'top 80%',
+            once: true,
+          },
+        }
+      );
+    }
   }, [supabase.auth]);
 
   const handleGetStarted = () => {
@@ -57,12 +83,13 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 lg:px-12 py-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div
+          <Link
+            href="/"
             ref={glitchLogoRef}
-            className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] gradient-text uppercase tracking-widest"
+            className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] gradient-text uppercase tracking-widest hover:opacity-80 transition-opacity"
           >
             scolo
-          </div>
+          </Link>
           <div className="flex items-center gap-8">
             <div className="hidden md:flex gap-8">
               <Link href="#features" className="text-white/60 hover:text-white transition-colors uppercase text-xs tracking-wider">
@@ -89,7 +116,7 @@ export default function LandingPage() {
           <div className="inline-flex items-center gap-2 px-4 py-2 square-glass mb-6">
             <div className="w-2 h-2 bg-cyan-400 animate-pulse" />
             <span className="text-cyan-400 text-xs uppercase tracking-widest">
-              Intelligence Canvas for Due Diligence
+              Intelligence Agents for Due Diligence
             </span>
           </div>
 
@@ -97,13 +124,12 @@ export default function LandingPage() {
             ref={heroTitleRef}
             className="text-5xl lg:text-7xl font-bold font-[family-name:var(--font-space-grotesk)] mb-6 uppercase"
           >
-            <span className="gradient-text">See the connections</span>
-            <br />
-            <span className="text-white">others miss</span>
+            <span className="gradient-text block">See the connections</span>
+            <span className="text-white block">others miss</span>
           </h1>
 
-          <p ref={heroSubtitleRef} className="text-xl text-white/60 max-w-2xl mx-auto mb-10 uppercase tracking-wide">
-            Scolo gives you an infinite canvas to search public records, run background checks,
+          <p ref={heroSubtitleRef} className="text-xl text-white/60 max-w-2xl mx-auto mb-10 uppercase tracking-wide relative z-10">
+            Search public records, run background checks, Sanction checks 
             and visualize relationships — all in one powerful workspace.
           </p>
 
@@ -122,51 +148,23 @@ export default function LandingPage() {
             </SquareButton>
           </div>
 
-          {/* Canvas Preview */}
-          <div ref={parallaxRef} className="mt-20">
+          {/* Canvas Preview - Video Demo */}
+          <div ref={parallaxRef} className="mt-20 relative z-0">
             <GlassCard className="p-1">
-              <div className="bg-black/60 h-[400px] relative overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative">
-                    {/* Central Entity Node - Square */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border-2 border-cyan-500/50 flex flex-col items-center justify-center animate-square-rotate">
-                      <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-2xl">
-                        👤
-                      </div>
-                      <div className="text-sm font-semibold uppercase tracking-wider mt-2">John Doe</div>
-                      <div className="text-xs text-white/50 uppercase">Subject</div>
-                    </div>
-
-                    {/* Connected Nodes - Squares */}
-                    <div className="absolute -top-20 -left-40 w-28 h-28 bg-purple-500/10 border-2 border-purple-500/30 p-3">
-                      <div className="text-xl mb-1">🏢</div>
-                      <div className="text-xs uppercase">Acme Corp</div>
-                    </div>
-
-                    <div className="absolute -top-20 left-40 w-28 h-28 bg-blue-500/10 border-2 border-blue-500/30 p-3">
-                      <div className="text-xl mb-1">📄</div>
-                      <div className="text-xs uppercase">Records</div>
-                    </div>
-
-                    <div className="absolute top-20 -left-36 w-28 h-28 bg-cyan-500/10 border-2 border-cyan-500/30 p-3">
-                      <div className="text-xl mb-1">🔗</div>
-                      <div className="text-xs uppercase">LinkedIn</div>
-                    </div>
-
-                    <div className="absolute top-20 left-36 w-28 h-28 bg-indigo-500/10 border-2 border-indigo-500/30 p-3">
-                      <div className="text-xl mb-1">📰</div>
-                      <div className="text-xs uppercase">News</div>
-                    </div>
-
-                    {/* Connection lines */}
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                      <line x1="50%" y1="50%" x2="20%" y2="30%" stroke="rgba(139, 92, 246, 0.3)" strokeWidth="1" />
-                      <line x1="50%" y1="50%" x2="80%" y2="30%" stroke="rgba(59, 130, 246, 0.3)" strokeWidth="1" />
-                      <line x1="50%" y1="50%" x2="25%" y2="70%" stroke="rgba(6, 182, 212, 0.3)" strokeWidth="1" />
-                      <line x1="50%" y1="50%" x2="75%" y2="70%" stroke="rgba(99, 102, 241, 0.3)" strokeWidth="1" />
-                    </svg>
-                  </div>
-                </div>
+              <div className="bg-black/60 relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
+                <video
+                  ref={videoRef}
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                >
+                  <source src="/scolo-demo.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                {/* Subtle gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
               </div>
             </GlassCard>
           </div>
@@ -174,10 +172,10 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 px-6">
+      <section id="features" className="py-24 px-6 relative z-10">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold font-[family-name:var(--font-space-grotesk)] mb-4 uppercase">
+            <h2 className="text-4xl lg:text-5xl font-bold font-[family-name:var(--font-space-grotesk)] mb-4 uppercase relative">
               Everything you need for due diligence
             </h2>
             <p className="text-xl text-white/60 max-w-2xl mx-auto uppercase tracking-wide">
@@ -227,7 +225,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section id="how" className="py-24 px-6">
+      <section id="how" className="py-24 px-6 relative z-10">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold font-[family-name:var(--font-space-grotesk)] mb-4 uppercase">
@@ -269,7 +267,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-6 text-center">
+      <section className="py-24 px-6 text-center relative z-10">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-4xl lg:text-5xl font-bold font-[family-name:var(--font-space-grotesk)] mb-4 uppercase">
             <span className="gradient-text">Ready to see the full picture?</span>
@@ -289,24 +287,24 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t-2 border-white/10">
+      <footer className="py-12 px-6 border-t-2 border-white/10 relative z-10">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] uppercase tracking-widest">scolo</div>
+          <Link href="/" className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] uppercase tracking-widest hover:opacity-80 transition-opacity">scolo</Link>
           <div className="flex gap-6">
-            <Link href="#features" className="text-white/40 hover:text-white/60 transition-colors text-xs uppercase tracking-wider">
+            <Link href="#features" className="text-white/50 hover:text-white/70 transition-colors text-xs uppercase tracking-wider">
               Features
             </Link>
-            <Link href="#" className="text-white/40 hover:text-white/60 transition-colors text-xs uppercase tracking-wider">
+            <Link href="#" className="text-white/50 hover:text-white/70 transition-colors text-xs uppercase tracking-wider">
               Docs
             </Link>
-            <Link href="#" className="text-white/40 hover:text-white/60 transition-colors text-xs uppercase tracking-wider">
+            <Link href="#" className="text-white/50 hover:text-white/70 transition-colors text-xs uppercase tracking-wider">
               Privacy
             </Link>
-            <Link href="#" className="text-white/40 hover:text-white/60 transition-colors text-xs uppercase tracking-wider">
+            <Link href="#" className="text-white/50 hover:text-white/70 transition-colors text-xs uppercase tracking-wider">
               Terms
             </Link>
           </div>
-          <div className="text-white/40 text-xs uppercase tracking-wider">© 2025 Scolo. All rights reserved.</div>
+          <div className="text-white/60 text-xs uppercase tracking-wider">© 2025 Scolo. All rights reserved.</div>
         </div>
       </footer>
     </>

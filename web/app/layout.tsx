@@ -14,7 +14,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'Scolo — Intelligence Canvas for Due Diligence',
+  title: 'Scolo — Intelligence Agents for Due Diligence',
   description: 'See the connections others miss. Scolo gives you an infinite canvas to search public records, run background checks, and visualize relationships.',
   icons: {
     icon: '/favicon.ico',

@@ -106,13 +106,13 @@ export const FindingNode = memo(({ id, data }: NodeProps) => {
         {isHovered && nodeData.onDelete && (
           <button
             onClick={() => nodeData.onDelete?.(id)}
-            className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100 z-50"
+            className="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex items-center justify-center shadow-lg shadow-red-500/30 transition-all opacity-0 group-hover:opacity-100 z-50 border border-red-400/30"
           >
             <X className="w-3 h-3" />
           </button>
         )}
 
-        <div className={`w-24 h-24 rounded-full ${config.bg} shadow-lg shadow-blue-500/30 flex flex-col items-center justify-center text-white transition-transform hover:scale-105 backdrop-blur-md`}>
+        <div className={`w-24 h-24 ${config.bg} shadow-lg shadow-blue-500/30 flex flex-col items-center justify-center text-white transition-transform hover:scale-105 backdrop-blur-md border-2 border-blue-400/30 grain`}>
           <Globe className="w-6 h-6 mb-1" />
           <span className="text-[10px] font-mono leading-tight text-center px-2 truncate max-w-full">
             {nodeData.label}
@@ -136,14 +136,13 @@ export const FindingNode = memo(({ id, data }: NodeProps) => {
         {isHovered && nodeData.onDelete && (
           <button
             onClick={() => nodeData.onDelete?.(id)}
-            className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100 z-50"
+            className="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex items-center justify-center shadow-lg shadow-red-500/30 transition-all opacity-0 group-hover:opacity-100 z-50 border border-red-400/30"
           >
             <X className="w-3 h-3" />
           </button>
         )}
 
-        <div className={`relative w-28 h-24 ${config.bg} shadow-lg shadow-orange-500/30 flex flex-col items-center justify-center text-white transition-transform hover:scale-105 backdrop-blur-md`}
-          style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)' }}
+        <div className={`relative w-28 h-24 ${config.bg} shadow-lg shadow-orange-500/30 flex flex-col items-center justify-center text-white transition-transform hover:scale-105 backdrop-blur-md border-2 border-orange-400/30 grain`}
         >
           <Wallet className="w-5 h-5 mb-1" />
           <span className="text-[9px] font-mono leading-tight text-center px-3 truncate max-w-full">
@@ -160,9 +159,9 @@ export const FindingNode = memo(({ id, data }: NodeProps) => {
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative bg-black/20 backdrop-blur-md border ${config.border} rounded-xl shadow-lg transition-all duration-200 min-w-[180px] max-w-[220px] overflow-visible group hover:scale-105 hover:bg-black/30`}
+      className={`relative bg-black/20 backdrop-blur-md border-2 ${config.border} shadow-lg transition-all duration-200 min-w-[180px] max-w-[220px] overflow-visible group hover:scale-105 hover:bg-black/30 grain`}
     >
-      <div className={`absolute top-0 left-0 right-0 h-0.5 rounded-t-xl ${config.bg}`} />
+      <div className={`absolute top-0 left-0 right-0 h-0.5 ${config.bg}`} />
 
       <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-gradient-to-r !from-cyan-400 !to-blue-500 !border-2 !border-white/30 !shadow-lg !shadow-cyan-500/30" />
 
@@ -177,7 +176,7 @@ export const FindingNode = memo(({ id, data }: NodeProps) => {
 
       <div className="p-3">
         <div className="flex items-start gap-2">
-          <div className={`p-1.5 rounded-lg ${config.bg} text-white flex-shrink-0`}>
+          <div className={`p-1.5 ${config.bg} text-white flex-shrink-0 border border-white/20`}>
             {config.icon}
           </div>
           <div className="flex-1 min-w-0">
@@ -194,12 +193,12 @@ export const FindingNode = memo(({ id, data }: NodeProps) => {
 
         <div className="mt-2 flex items-center gap-1.5 flex-wrap">
           {nodeData.severity && (
-            <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${SEVERITY_COLORS[nodeData.severity]}`}>
+            <span className={`px-1.5 py-0.5 text-[9px] font-medium ${SEVERITY_COLORS[nodeData.severity]} border border-white/10`}>
               {nodeData.severity.toUpperCase()}
             </span>
           )}
           {nodeData.confidence && (
-            <span className="px-1.5 py-0.5 bg-black/40 text-white/70 rounded text-[9px] font-medium">
+            <span className="px-1.5 py-0.5 bg-black/40 text-white/70 text-[9px] font-medium border border-white/10">
               {nodeData.confidence}%
             </span>
           )}
@@ -208,7 +207,7 @@ export const FindingNode = memo(({ id, data }: NodeProps) => {
               href={nodeData.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-0.5 hover:bg-black/40 rounded"
+              className="p-0.5 hover:bg-black/40 border border-transparent hover:border-white/10 transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
               <ExternalLink className="w-3 h-3 text-white/50" />

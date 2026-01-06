@@ -22,10 +22,18 @@ export default async function ProjectsPage() {
 
     if (userProjects.length > 0) {
       redirect(`/projects/${userProjects[0].id}`);
+    } else {
+      redirect('/projects/new');
     }
   } catch (error) {
+    // Don't catch NEXT_REDIRECT errors
+    if (error && typeof error === 'object' && 'digest' in error) {
+      const digest = (error as any).digest;
+      if (typeof digest === 'string' && digest.startsWith('NEXT_REDIRECT')) {
+        throw error;
+      }
+    }
     console.error('Failed to fetch projects:', error);
+    redirect('/projects/new');
   }
-
-  redirect('/projects/new');
 }

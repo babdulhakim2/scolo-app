@@ -65,31 +65,54 @@ export function useTextReveal(delay = 0) {
     const element = ref.current;
     if (!element) return;
 
-    const text = element.textContent || '';
-    element.innerHTML = '';
+    // Check if element has child spans (for split lines)
+    const childSpans = element.querySelectorAll('span');
 
-    const words = text.split(' ');
-    words.forEach((word, i) => {
-      const span = document.createElement('span');
-      span.textContent = word + ' ';
-      span.style.display = 'inline-block';
-      span.style.overflow = 'hidden';
+    if (childSpans.length > 0) {
+      // Animate each span separately
+      gsap.set(childSpans, {
+        opacity: 0,
+        y: 50,
+        clipPath: 'inset(0 0 100% 0)'
+      });
 
-      const inner = document.createElement('span');
-      inner.textContent = word + ' ';
-      inner.style.display = 'inline-block';
-      span.innerHTML = '';
-      span.appendChild(inner);
-
-      element.appendChild(span);
-
-      gsap.from(inner, {
-        y: '100%',
-        duration: 0.8,
-        delay: delay + i * 0.05,
+      gsap.to(childSpans, {
+        opacity: 1,
+        y: 0,
+        clipPath: 'inset(0 0 0% 0)',
+        duration: 1.2,
+        stagger: 0.3,
+        delay,
         ease: 'power3.out',
       });
-    });
+    } else {
+      // Original word-by-word animation
+      const text = element.textContent || '';
+      element.innerHTML = '';
+
+      const words = text.split(' ');
+      words.forEach((word, i) => {
+        const span = document.createElement('span');
+        span.textContent = word + ' ';
+        span.style.display = 'inline-block';
+        span.style.overflow = 'hidden';
+
+        const inner = document.createElement('span');
+        inner.textContent = word + ' ';
+        inner.style.display = 'inline-block';
+        span.innerHTML = '';
+        span.appendChild(inner);
+
+        element.appendChild(span);
+
+        gsap.from(inner, {
+          y: '100%',
+          duration: 0.8,
+          delay: delay + i * 0.05,
+          ease: 'power3.out',
+        });
+      });
+    }
   }, [delay]);
 
   return ref;
@@ -119,8 +142,8 @@ export function useParallax(speed = 0.5) {
 }
 
 // Glitch effect on hover
-export function useGlitchHover() {
-  const ref = useRef<HTMLDivElement>(null);
+export function useGlitchHover<T extends HTMLElement = HTMLDivElement>() {
+  const ref = useRef<T>(null);
 
   useEffect(() => {
     const element = ref.current;
@@ -175,6 +198,7 @@ export function useStaggerFadeIn(stagger = 0.1) {
     gsap.set(children, {
       opacity: 0,
       y: 30,
+      scale: 0.95,
     });
 
     ScrollTrigger.create({
@@ -184,6 +208,7 @@ export function useStaggerFadeIn(stagger = 0.1) {
         gsap.to(children, {
           opacity: 1,
           y: 0,
+          scale: 1,
           duration: 0.8,
           stagger: stagger,
           ease: 'power3.out',
