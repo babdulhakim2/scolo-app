@@ -28,7 +28,6 @@ export default function LandingPage() {
   const featuresRef = useStaggerFadeIn(0.1);
   const glitchLogoRef = useGlitchHover<HTMLAnchorElement>();
   const parallaxRef = useParallax(0.3);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -43,25 +42,6 @@ export default function LandingPage() {
         heroSubtitleRef.current,
         { opacity: 0, y: 30 },
         { opacity: 1, y: 0, duration: 1, delay: 1.2, ease: 'power3.out' }
-      );
-    }
-
-    // Animate video on scroll
-    if (videoRef.current) {
-      gsap.fromTo(
-        videoRef.current,
-        { scale: 0.9, opacity: 0 },
-        {
-          scale: 1,
-          opacity: 0.9,
-          duration: 1.5,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: videoRef.current,
-            start: 'top 80%',
-            once: true,
-          },
-        }
       );
     }
   }, [supabase.auth]);
@@ -152,19 +132,14 @@ export default function LandingPage() {
           <div ref={parallaxRef} className="mt-20 relative z-0">
             <GlassCard className="p-1">
               <div className="bg-black/60 relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
-                <video
-                  ref={videoRef}
+                <img
+                  src="/scolo-demo-optimized.gif"
+                  alt="Scolo Demo"
                   className="w-full h-full object-cover"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                >
-                  <source src="/scolo-demo.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+                  loading="lazy"
+                />
                 {/* Subtle gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none z-10" />
               </div>
             </GlassCard>
           </div>
