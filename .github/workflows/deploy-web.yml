@@ -53,7 +53,7 @@ jobs:
         run: |
           echo "Starting Cloud Build for web..."
           gcloud builds submit \
-            --config=web/cloudbuild.yaml \
+            --config=cloudbuild-web.yaml \
             --project=${{ env.PROJECT_ID }} \
             --substitutions=_PROJECT_ID=${{ env.PROJECT_ID }},_REGION=${{ env.REGION }}
 

@@ -5,7 +5,8 @@ steps:
     args:
       - '-c'
       - |
-        gcloud secrets versions access latest --secret=scolo-osint-web > web/.env
+        gcloud secrets versions access latest --secret=scolo-osint-web > .env.production
+        cp .env.production web/.env.production
         echo "✅ Environment variables loaded for web build"
     secretEnv: ['SECRET']
 
@@ -18,10 +19,10 @@ steps:
       - '-t'
       - 'us-central1-docker.pkg.dev/${_PROJECT_ID}/scolo-repo/scolo-web:$BUILD_ID'
       - '--build-arg'
-      - 'ENV_FILE=.env'
+      - 'ENV_FILE=.env.production'
       - '-f'
       - 'web/Dockerfile'
-      - 'web'
+      - './web'
 
   # Step 3: Push the image
   - name: 'gcr.io/cloud-builders/docker'
