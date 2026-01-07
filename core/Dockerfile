@@ -27,5 +27,5 @@ ENV PYTHONPATH=/app:$PYTHONPATH
 # Expose port
 EXPOSE 8080
 
-# Run with Python module
-CMD exec python -m gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 src.api.main:app
+# Run with uvicorn (ASGI server for FastAPI)
+CMD exec python -m uvicorn src.api.main:app --host 0.0.0.0 --port $PORT
