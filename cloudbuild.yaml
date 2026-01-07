@@ -40,7 +40,7 @@ steps:
       - "--image=us-central1-docker.pkg.dev/${_PROJECT_ID}/scolo-repo/scolo-bot:$BUILD_ID"
       - "--platform=managed"
       - "--region=${_REGION}"
-      - "--memory=512Mi"
+      - "--memory=1Gi"
       - "--cpu=1"
       - "--min-instances=0"
       - "--max-instances=10"
