@@ -1,0 +1,63 @@
+name: Deploy Web to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'web/**'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: scolo-ai
+  SERVICE: scolo-web
+  REGION: us-central1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Check/Create Artifact Registry Repository
+        run: |
+          if ! gcloud artifacts repositories describe scolo-repo \
+            --location=${{ env.REGION }} &>/dev/null; then
+            echo "Creating Artifact Registry repository..."
+            gcloud artifacts repositories create scolo-repo \
+              --repository-format=docker \
+              --location=${{ env.REGION }} \
+              --description="Scolo Docker images"
+          fi
+
+      - name: Trigger Cloud Build
+        run: |
+          echo "Starting Cloud Build for web..."
+          gcloud builds submit \
+            --config=web/cloudbuild.yaml \
+            --project=${{ env.PROJECT_ID }} \
+            --substitutions=_PROJECT_ID=${{ env.PROJECT_ID }},_REGION=${{ env.REGION }}
+
+      - name: Get Cloud Run URL
+        run: |
+          echo "Web app deployed to:"
+          gcloud run services describe $SERVICE --region $REGION --format 'value(status.url)'

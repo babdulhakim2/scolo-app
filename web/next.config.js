@@ -1,10 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Allow video files to be served
+  output: 'standalone',
+
+  // For static assets
   async headers() {
     return [
       {
-        source: '/scolo-demo.mp4',
+        source: '/:path*',
         headers: [
           {
             key: 'Cache-Control',
@@ -13,13 +15,6 @@ const nextConfig = {
         ],
       },
     ];
-  },
-
-  // Increase body size limit for video files
-  experimental: {
-    outputFileTracingIncludes: {
-      '/': ['./public/**/*'],
-    },
   },
 };
 
