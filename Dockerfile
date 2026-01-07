@@ -31,5 +31,8 @@ ENV PORT=8080
 # Expose port
 EXPOSE 8080
 
+# Change to backend directory and run gunicorn
+WORKDIR /app/backend
+
 # Run with gunicorn - correct module path
 CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 src.api.main:app
