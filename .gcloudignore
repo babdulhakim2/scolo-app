@@ -36,8 +36,6 @@ firestore-debug.log
 # Documentation
 README.md
 
-# Other projects
-
 # Web project (separate deployment)
 web/
 node_modules/

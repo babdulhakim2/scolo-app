@@ -5,8 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'backend/**'
-      - 'Dockerfile'
+      - 'core/**'
       - 'cloudbuild.yaml'
       - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:

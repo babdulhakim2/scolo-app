@@ -1,12 +1,12 @@
 steps:
-  # Step 1: Create .env file from secret
+  # Step 1: Create .env file from secret for build
   - name: "gcr.io/cloud-builders/gcloud"
     entrypoint: "bash"
     args:
       - "-c"
       - |
-        gcloud secrets versions access latest --secret=scolo-app-osint-production-secrets > .env
-        echo "✅ Environment variables loaded"
+        gcloud secrets versions access latest --secret=scolo-app-osint-production-secrets > core/.env
+        echo "✅ Environment variables loaded for build"
 
     secretEnv: ["SECRET"]
 
@@ -21,8 +21,8 @@ steps:
       - "--build-arg"
       - "ENV_FILE=.env"
       - "-f"
-      - "Dockerfile"
-      - "."
+      - "core/Dockerfile"
+      - "core"
 
   # Step 3: Push the image
   - name: "gcr.io/cloud-builders/docker"
