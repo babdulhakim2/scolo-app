@@ -1,0 +1,43 @@
+# This file is used for web deployment to Cloud Build
+# It includes the web directory but excludes other unnecessary files
+
+.gcloudignore
+.git
+.gitignore
+
+# Python backend (not needed for web deployment)
+core/
+backend/
+*.py
+__pycache__/
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+.env.development
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation
+README.md
+*.md
+
+# GitHub
+.github/
+
+# Other build configs
+cloudbuild.yaml
+Dockerfile
+
+# Large files not needed for web build
+*.log
+logs/

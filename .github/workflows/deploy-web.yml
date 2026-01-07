@@ -52,6 +52,9 @@ jobs:
       - name: Trigger Cloud Build
         run: |
           echo "Starting Cloud Build for web..."
+          # Use the web-specific gcloudignore file
+          cp .gcloudignore.web .gcloudignore
+
           gcloud builds submit \
             --config=cloudbuild-web.yaml \
             --project=${{ env.PROJECT_ID }} \
