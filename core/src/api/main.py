@@ -24,7 +24,8 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "https://scolo-bot-*.run.app",  # Cloud Run URLs
         "https://scolo.app",  # Production domain (if you have one)
-        "https://www.scolo.app",  # Production www domain
+        "https://www.scolo.app",
+        "https://scolo-web-431851425237.us-central1.run.app"  # Production www domain
     ],
     allow_credentials=True,
     allow_methods=["*"],

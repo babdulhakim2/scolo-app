@@ -266,16 +266,10 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <Link href="/" className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] uppercase tracking-widest hover:opacity-80 transition-opacity">scolo</Link>
           <div className="flex gap-6">
-            <Link href="#features" className="text-white/50 hover:text-white/70 transition-colors text-xs uppercase tracking-wider">
-              Features
-            </Link>
-            <Link href="#" className="text-white/50 hover:text-white/70 transition-colors text-xs uppercase tracking-wider">
-              Docs
-            </Link>
-            <Link href="#" className="text-white/50 hover:text-white/70 transition-colors text-xs uppercase tracking-wider">
+            <Link href="/privacy" className="text-white/50 hover:text-white/70 transition-colors text-xs uppercase tracking-wider">
               Privacy
             </Link>
-            <Link href="#" className="text-white/50 hover:text-white/70 transition-colors text-xs uppercase tracking-wider">
+            <Link href="/terms" className="text-white/50 hover:text-white/70 transition-colors text-xs uppercase tracking-wider">
               Terms
             </Link>
           </div>

@@ -58,13 +58,13 @@ export default function LoginPage() {
       type: 'email',
     });
 
-    setLoading(false);
-
     if (error) {
       setError(error.message);
+      setLoading(false);
       return;
     }
 
+    // Keep loading state during redirect
     router.push('/projects');
     router.refresh();
   };
@@ -192,7 +192,10 @@ export default function LoginPage() {
                   className="w-full"
                 >
                   {loading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Confirming...
+                    </>
                   ) : (
                     'Verify & Continue'
                   )}
