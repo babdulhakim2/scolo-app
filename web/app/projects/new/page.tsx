@@ -7,7 +7,9 @@ export default async function NewProjectPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Middleware handles auth, but we still need user for data loading
   if (!user) {
+    // This shouldn't happen with middleware, but keep as safety
     redirect('/login');
   }
 

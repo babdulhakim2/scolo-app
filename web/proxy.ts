@@ -34,14 +34,16 @@ export async function proxy(request: NextRequest) {
   const isAuthCallback = pathname === '/auth/callback';
   const isApiRoute = pathname.startsWith('/api');
   const isRootPage = pathname === '/';
+  const isPrivacyPage = pathname === '/privacy';
+  const isTermsPage = pathname === '/terms';
 
   // Skip middleware for API routes and auth callback
   if (isApiRoute || isAuthCallback) {
     return supabaseResponse;
   }
 
-  // Allow access to root page without authentication
-  if (isRootPage) {
+  // Allow access to public pages without authentication
+  if (isRootPage || isPrivacyPage || isTermsPage) {
     return supabaseResponse;
   }
 

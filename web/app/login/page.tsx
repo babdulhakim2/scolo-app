@@ -96,67 +96,69 @@ export default function LoginPage() {
           {/* Login Form */}
           <GlassCard className="p-8">
             {step === 'email' ? (
-              <form onSubmit={handleSendOtp} className="space-y-5">
-                <div>
-                  <label htmlFor="email" className="block text-xs font-medium text-white/80 mb-2 uppercase tracking-wider">
-                    Email address
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
-                    <input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@company.com"
-                      className="w-full pl-12 pr-4 py-3 bg-black/20 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                      autoFocus
-                    />
+              <>
+                <form onSubmit={handleSendOtp} className="space-y-5">
+                  <div>
+                    <label htmlFor="email" className="block text-xs font-medium text-white/80 mb-2 uppercase tracking-wider">
+                      Email address
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                      <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@company.com"
+                        className="w-full pl-12 pr-4 py-3 bg-black/20 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                        autoFocus
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {error && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/20">
-                    <p className="text-red-400 text-sm">{error}</p>
-                  </div>
-                )}
-
-                <SquareButton
-                  type="submit"
-                  disabled={loading || !email.trim()}
-                  variant="primary"
-                  className="w-full"
-                >
-                  {loading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      Continue with Email
-                      <ArrowRight className="w-5 h-5" />
-                    </>
+                  {error && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/20">
+                      <p className="text-red-400 text-sm">{error}</p>
+                    </div>
                   )}
-                </SquareButton>
 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/10" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-transparent text-white/40 uppercase text-xs tracking-wider">or</span>
-                  </div>
-                </div>
+                  <SquareButton
+                    type="submit"
+                    disabled={loading || !email.trim()}
+                    variant="primary"
+                    className="w-full"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        Continue with Email
+                        <ArrowRight className="w-5 h-5" />
+                      </>
+                    )}
+                  </SquareButton>
 
-                <p className="text-center text-white/40 text-xs uppercase tracking-wider">
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-white/10" />
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-transparent text-white/40 uppercase text-xs tracking-wider">or</span>
+                    </div>
+                  </div>
+                </form>
+
+                <p className="text-center text-white/40 text-xs uppercase tracking-wider mt-5">
                   By continuing, you agree to our{' '}
-                  <Link href="#" className="text-cyan-400 hover:text-cyan-300 transition-colors">
+                  <Link href="/terms" className="text-cyan-400 hover:text-cyan-300 transition-colors">
                     Terms
                   </Link>{' '}
                   and{' '}
-                  <Link href="#" className="text-cyan-400 hover:text-cyan-300 transition-colors">
+                  <Link href="/privacy" className="text-cyan-400 hover:text-cyan-300 transition-colors">
                     Privacy Policy
                   </Link>
                 </p>
-              </form>
+              </>
             ) : (
               <form onSubmit={handleVerifyOtp} className="space-y-5">
                 <div>
