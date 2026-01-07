@@ -1,6 +1,12 @@
 import logging
+import os
 from dotenv import load_dotenv
-load_dotenv()
+
+# Try loading from /secrets/.env first (Cloud Run), then fallback to local .env
+if os.path.exists('/secrets/.env'):
+    load_dotenv('/secrets/.env')
+else:
+    load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 
